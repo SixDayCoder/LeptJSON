@@ -6,6 +6,9 @@
 #include <cassert>
 
 
+#define ISDIGIT(ch)      ( (ch) >= '0' && (ch) <= '9')
+#define ISDIGIT1TO9(ch)  ( (ch) >= '1' && (ch) <= '9')
+
 
 enum LeptType {
 
@@ -31,6 +34,7 @@ enum ParseState {
 
 struct LeptValue{
 
+	double number;
 	LeptType type;
 
 };
@@ -42,9 +46,13 @@ struct LeptContext {
 
 };
 
+/// 如果类型为数字,获取LeptValue的number
+double LeptGetNumber(const LeptValue& v);
+
+
 /// 构造解析树
 /// json(in) : json文本
-/// v(out)   : 解析树
+/// v(out)   : 解析对象
 ParseState LeptParse(const char* json, LeptValue& v);
 
 
@@ -55,27 +63,31 @@ void LeptParseWhitespace(LeptContext& context);
 
 /// 解析字面值
 /// context(in out) : 解析器上下文
-/// v(out)      : 解析树
+/// v(out)      : 解析对象
 ParseState LeptParseValue(LeptContext& context, LeptValue& v);
 
 
 /// 解析NULL
 /// context(in out) : 解析器上下文
-/// v(out)      : 解析树
+/// v(out)      : 解析对象
 ParseState LeptParseNull(LeptContext& context, LeptValue& v);
 
 
 /// 解析true值
 /// context(in out) : 解析器上下文
-/// v(out)      : 解析树
+/// v(out)      : 解析对象
 ParseState LeptParseTrue(LeptContext& context, LeptValue& v);
 
 
 /// 解析false值
 /// context(in out) : 解析器上下文
-/// v(out)      : 解析树
+/// v(out)      : 解析对象
 ParseState LeptParseFalse(LeptContext& context, LeptValue& v);
 
+/// 解析数字值
+/// context(in out) : 解析器上下文
+/// v(out)  : 解析对象
+ParseState LeptParseNumber(LeptContext& context, LeptValue& v);
 
 
 #endif // ! SIXDAY_LEPTJSON_H

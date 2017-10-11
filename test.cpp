@@ -29,7 +29,25 @@ static int gTestPass = 0;
 
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE( (expect) == (actual), expect, actual, "%d") 
 
-#define EXPECT_EQ_CTYPE_STRING(expect, actual) EXPECT_EQ_BASE( ( strcmp( (expect), (actual) ) == 0 ), expect, actual, "%s" )
+#define EXPECT_EQ_DOUBLE(expect, actual) EXPECT_EQ_BASE( (expect) == (actual), expect, actual, "%.17g")
+
+
+#define TEST_ERROR(error, json) \
+		do{\
+			LeptValue v;\
+			v.type = LeptType:::LEPT_FALSE;\
+			EXPECT_EQ_INT(error, LeptParse(json, v));\
+			EXPECT_EQ_INT(LeptType::LEPT_NULL, v.type);\
+		}while(0)
+
+
+#define TEST_NUMBER(expect, json) \
+		do{\
+			LeptValue v;\
+			EXPECT_EQ_INT(ParseState::LEPT_PARSE_SUCCESS, LeptParse(json, v));\
+			EXPECT_EQ_INT(LeptType::LEPT_NUMBER, v.type);\
+			EXPECT_EQ_DOUBLE(expect, LeptGetNumber(v));\
+		}while(0)
 
 
 static void TestParseNull() 
@@ -51,7 +69,6 @@ static void TestParseTrue()
 
 	EXPECT_EQ_INT(ParseState::LEPT_PARSE_SUCCESS, LeptParse("true", v) );
 	EXPECT_EQ_INT(LeptType::LEPT_TRUE, v.type);
-
 }
 
 static void TestParseFalse()
@@ -107,6 +124,30 @@ static void TestParseInvalidValue()
 
 }
 
+static void TestParseNumber() {
+
+	TEST_NUMBER(0.0, "0");
+	TEST_NUMBER(0.0, "-0");
+	TEST_NUMBER(0.0, "-0.0");
+	TEST_NUMBER(1.0, "1");
+	TEST_NUMBER(-1.0, "-1");
+	TEST_NUMBER(1.5, "1.5");
+	TEST_NUMBER(-1.5, "-1.5");
+	TEST_NUMBER(3.1416, "3.1416");
+	TEST_NUMBER(1E10, "1E10");
+	TEST_NUMBER(1e10, "1e10");
+	TEST_NUMBER(1E+10, "1E+10");
+	TEST_NUMBER(1E-10, "1E-10");
+	TEST_NUMBER(-1E10, "-1E10");
+	TEST_NUMBER(-1e10, "-1e10");
+	TEST_NUMBER(-1E+10, "-1E+10");
+	TEST_NUMBER(-1E-10, "-1E-10");
+	TEST_NUMBER(1.234E+10, "1.234E+10");
+	TEST_NUMBER(1.234E-10, "1.234E-10");
+	TEST_NUMBER(0.0, "1e-10000"); /* must underflow */
+
+}
+
 static void Test()
 {
 	TestParseNull();
@@ -120,6 +161,8 @@ static void Test()
 	TestParseExpectValue();
 
 	TestParseInvalidValue();
+
+	TestParseNumber();
 }
 
 int main()

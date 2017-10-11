@@ -1,6 +1,12 @@
 #include "leptjson.h"
 
-ParseState LeptParse(const char* json, LeptValue& v) 
+double LeptGetNumber(const LeptValue & v)
+{
+	assert(v.type == LeptType::LEPT_NUMBER);
+	return v.number;
+}
+
+ParseState LeptParse(const char* json, LeptValue& v)
 {
 	assert(json != nullptr);
 
@@ -45,29 +51,15 @@ ParseState LeptParseValue(LeptContext& context, LeptValue& v)
 {
 	switch ( *context.json ){
 
-		case 'n': {
-			return LeptParseNull(context, v);
-		}
-		break;
+		case 'n' :  return LeptParseNull(context, v);  
 
-		case 't': {
-			return LeptParseTrue(context, v);
-		}
-		break;
+		case 't' :  return LeptParseTrue(context, v);  
 
-		case 'f': {
-			return LeptParseFalse(context, v);
-		}
-		break;
+		case 'f' :  return LeptParseFalse(context, v); 
 
-		case '\0': {
-			return ParseState::LEPT_PARSE_EXPECT_VALUE;
-		}
-		break;
+		default:    return LeptParseNumber(context, v);
 
-		default:
-			return ParseState::LEPT_PARSE_INVALID_VALUE;
-		break;
+		case '\0':  return ParseState::LEPT_PARSE_EXPECT_VALUE; 
 
 	}
 
@@ -135,4 +127,26 @@ ParseState LeptParseFalse(LeptContext & context, LeptValue & v)
 		return ParseState::LEPT_PARSE_SUCCESS;
 
 	}
+}
+
+ParseState LeptParseNumber(LeptContext & context, LeptValue & v)
+{
+	char* end = NULL;
+
+	double number = strtold(context.json, &end);
+
+	//end -> 第一个不为数字的指针
+
+	if (context.json == end) {
+		return ParseState::LEPT_PARSE_INVALID_VALUE;
+	}
+	else {
+
+		v.number = number;
+		v.type = LeptType::LEPT_NUMBER;
+		context.json = end;
+
+		return ParseState::LEPT_PARSE_SUCCESS;
+	}
+
 }
