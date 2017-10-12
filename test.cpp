@@ -112,7 +112,7 @@ static void TestParseNumber()
 static void TestParseNotSingular()
 {
 
-	TEST_ERROR(ParseState::LEPT_PARSE_ROOT_NOT_SINGULAR, "  false  true ");
+	TEST_ERROR(ParseState::LEPT_PARSE_ROOT_NOT_SINGULAR, "  false  true");
 
 #if 0
 

@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
+#include <cerrno>
 
 
 #define ISDIGIT(ch)      ( (ch) >= '0' && (ch) <= '9')
