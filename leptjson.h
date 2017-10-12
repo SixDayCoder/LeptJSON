@@ -12,7 +12,6 @@
 
 enum LeptType {
 
-	LEPT_NOT_SINGULAR,
 	LEPT_NULL,
 	LEPT_FALSE,
 	LEPT_TRUE,
@@ -28,6 +27,7 @@ enum ParseState {
 	LEPT_PARSE_SUCCESS,
 	LEPT_PARSE_EXPECT_VALUE,       //json只含有空白符
 	LEPT_PARSE_ROOT_NOT_SINGULAR, //若一个值在空白之后还有其他的值,意味着根节点不唯一
+	LEPT_PARSE_NUMBER_TOO_BIG,    //数字越上届
 	LEPT_PARSE_INVALID_VALUE     //除上述两种错误之外的错误
 
 };

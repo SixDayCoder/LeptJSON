@@ -26,9 +26,9 @@ ParseState LeptParse(const char* json, LeptValue& v)
 		//如果去掉空格后字符串没有结束
 		if (*context.json != '\0') {
 
-			v.type = LeptType::LEPT_NOT_SINGULAR;
-
+			v.type = LeptType::LEPT_NULL;
 			return ParseState::LEPT_PARSE_ROOT_NOT_SINGULAR;
+
 		}
 		else
 			return ParseState::LEPT_PARSE_SUCCESS;
