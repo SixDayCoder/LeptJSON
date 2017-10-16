@@ -1,3 +1,4 @@
+
 #ifndef  SIXDAY_LEPTJSON_H
 #define  SIXDAY_LEPTJSON_H
 
@@ -5,10 +6,16 @@
 #include <cstdlib>
 #include <cassert>
 #include <cerrno>
+#include <cstring>
 
 
 #define ISDIGIT(ch)      ( (ch) >= '0' && (ch) <= '9')
 #define ISDIGIT1TO9(ch)  ( (ch) >= '1' && (ch) <= '9')
+
+
+#ifndef LEPT_PARSE_STACK_INIT_SIZE
+#define LEPT_PARSE_STACK_INIT_SIZE 256
+#endif // !1
 
 
 enum LeptType {
@@ -19,23 +26,33 @@ enum LeptType {
 	LEPT_NUMBER,
 	LEPT_STRING,
 	LEPT_ARRAY,
-	LEPT_OBJECT
+	LEPT_STRING,
 
-} ;
+};
 
 enum ParseState {
 
 	LEPT_PARSE_SUCCESS,
-	LEPT_PARSE_EXPECT_VALUE,       //jsonÖ»º¬ÓÐ¿Õ°×·û
-	LEPT_PARSE_ROOT_NOT_SINGULAR, //ÈôÒ»¸öÖµÔÚ¿Õ°×Ö®ºó»¹ÓÐÆäËûµÄÖµ,ÒâÎ¶×Å¸ù½Úµã²»Î¨Ò»
-	LEPT_PARSE_NUMBER_TOO_BIG,    //Êý×ÖÔ½ÉÏ½ì
-	LEPT_PARSE_INVALID_VALUE     //³ýÉÏÊöÁ½ÖÖ´íÎóÖ®ÍâµÄ´íÎó
+	LEPT_PARSE_EXPECT_VALUE,       //jsonåªå«æœ‰ç©ºç™½ç¬¦
+	LEPT_PARSE_ROOT_NOT_SINGULAR, //è‹¥ä¸€ä¸ªå€¼åœ¨ç©ºç™½ä¹‹åŽè¿˜æœ‰å…¶ä»–çš„å€¼,æ„å‘³ç€æ ¹èŠ‚ç‚¹ä¸å”¯ä¸€
+	LEPT_PARSE_NUMBER_TOO_BIG,    //æ•°å­—è¶Šä¸Šå±Š
+	LEPT_PARSE_INVALID_VALUE     //é™¤ä¸Šè¿°ä¸¤ç§é”™è¯¯ä¹‹å¤–çš„é”™è¯¯
 
 };
 
-struct LeptValue{
+struct LeptValue {
 
-	double number;
+	union {
+
+		struct{
+			char* s;
+			size_t len;
+		}str;
+
+		double number;
+
+	}u;
+	
 	LeptType type;
 
 };
@@ -45,51 +62,81 @@ struct LeptContext {
 
 	const char* json;
 
+	char* stack;
+	size_t size, top;
+
 };
 
-/// Èç¹ûÀàÐÍÎªÊý×Ö,»ñÈ¡LeptValueµÄnumber
+/// å¦‚æžœç±»åž‹ä¸ºæ•°å­—,èŽ·å–LeptValueçš„number
 double LeptGetNumber(const LeptValue& v);
 
 
-/// ¹¹Ôì½âÎöÊ÷
-/// json(in) : jsonÎÄ±¾
-/// v(out)   : ½âÎö¶ÔÏó
+/// æž„é€ è§£æžæ ‘
+/// json(in) : jsonæ–‡æœ¬
+/// v(out)   : è§£æžå¯¹è±¡
 ParseState LeptParse(const char* json, LeptValue& v);
 
 
-/// Ìø¹ý¿Õ°×·û
-/// context(in out) : ½âÎöÆ÷ÉÏÏÂÎÄ
+/// è·³è¿‡ç©ºç™½ç¬¦
+/// context(in out) : è§£æžå™¨ä¸Šä¸‹æ–‡
 void LeptParseWhitespace(LeptContext& context);
 
 
-/// ½âÎö×ÖÃæÖµ
-/// context(in out) : ½âÎöÆ÷ÉÏÏÂÎÄ
-/// v(out)      : ½âÎö¶ÔÏó
+/// è§£æžå­—é¢å€¼
+/// context(in out) : è§£æžå™¨ä¸Šä¸‹æ–‡
+/// v(out)      : è§£æžå¯¹è±¡
 ParseState LeptParseValue(LeptContext& context, LeptValue& v);
 
 
-/// ½âÎöNULL
-/// context(in out) : ½âÎöÆ÷ÉÏÏÂÎÄ
-/// v(out)      : ½âÎö¶ÔÏó
+/// è§£æžNULL
+/// context(in out) : è§£æžå™¨ä¸Šä¸‹æ–‡
+/// v(out)      : è§£æžå¯¹è±¡
 ParseState LeptParseNull(LeptContext& context, LeptValue& v);
 
 
-/// ½âÎötrueÖµ
-/// context(in out) : ½âÎöÆ÷ÉÏÏÂÎÄ
-/// v(out)      : ½âÎö¶ÔÏó
+/// è§£æžtrueå€¼
+/// context(in out) : è§£æžå™¨ä¸Šä¸‹æ–‡
+/// v(out)      : è§£æžå¯¹è±¡
 ParseState LeptParseTrue(LeptContext& context, LeptValue& v);
 
 
-/// ½âÎöfalseÖµ
-/// context(in out) : ½âÎöÆ÷ÉÏÏÂÎÄ
-/// v(out)      : ½âÎö¶ÔÏó
+/// è§£æžfalseå€¼
+/// context(in out) : è§£æžå™¨ä¸Šä¸‹æ–‡
+/// v(out)      : è§£æžå¯¹è±¡
 ParseState LeptParseFalse(LeptContext& context, LeptValue& v);
 
-/// ½âÎöÊý×ÖÖµ
-/// context(in out) : ½âÎöÆ÷ÉÏÏÂÎÄ
-/// v(out)  : ½âÎö¶ÔÏó
+/// è§£æžæ•°å­—å€¼
+/// context(in out) : è§£æžå™¨ä¸Šä¸‹æ–‡
+/// v(out)  : è§£æžå¯¹è±¡
 ParseState LeptParseNumber(LeptContext& context, LeptValue& v);
 
 
+/// è§£æžå­—ç¬¦ä¸²
+/// context(in out) : è§£æžå™¨ä¸Šä¸‹æ–‡
+/// v(out)  : è§£æžå¯¹è±¡
+ParseState LeptParseString(LeptContext& context, LeptValue& v);
+
+/// åŠ¨æ€åˆ†é…å­—ç¬¦ä¸²
+/// s(in)  ï¼š å­—ç¬¦ä¸²
+/// len(in)ï¼š å­—ç¬¦ä¸²çš„é•¿åº¦
+/// v(out) ï¼š è§£æžå¯¹è±¡
+void LeptSetString(const char* s, size_t len, LeptValue& v);
+
+
+/// å›žæ”¶åˆ†é…çš„å­—ç¬¦ä¸²
+/// v(in out) å­˜å‚¨å­—ç¬¦ä¸²
+void LeptFreeString(LeptValue& v);
+
+
+/// ä»¥contextå»ºç«‹å­—ç¬¦ä¸²è§£æžçš„ç¼“å†²åŒº,ä¸´æ—¶å­˜å‚¨å­—ç¬¦ä¸²
+/// c(in out) : è§£æžå™¨ä¸Šä¸‹æ–‡
+/// size(in)  : è¦åŽ‹æ ˆçš„å­—ç¬¦ä¸²çš„é•¿åº¦ 
+void* LeptContextPush(LeptContext& c, size_t size);
+
+
+/// ä»¥contextå»ºç«‹å­—ç¬¦ä¸²è§£æžçš„ç¼“å†²åŒº,ä¸´æ—¶å­˜å‚¨å­—ç¬¦ä¸²
+/// c(in out) : è§£æžå™¨ä¸Šä¸‹æ–‡
+/// size(in)  : è¦å¼¹å‡ºçš„å­—ç¬¦ä¸²çš„é•¿åº¦ 
+void* LeptContextPop(LeptContext& c, size_t size);
 #endif // ! SIXDAY_LEPTJSON_H
 

@@ -9,8 +9,8 @@ static int gMainReturn = 0;
 static int gTestCount = 0;
 static int gTestPass = 0;
 
-//__FILE__ : Œƒº˛√˚
-//__LINE__ : ––∫≈
+//__FILE__ : Êñá‰ª∂Âêç
+//__LINE__ : Ë°åÂè∑
 
 #define EXPECT_EQ_BASE(equality, expect, actual, format) \
 		do{\
@@ -31,9 +31,12 @@ static int gTestPass = 0;
 
 #define EXPECT_EQ_DOUBLE(expect, actual) EXPECT_EQ_BASE( (expect) == (actual), expect, actual, "%.17g")
 
+#define EXPECT_EQ_STRING(expect, actual, len) \
+		EXPECT_EQ_BASE(  (sizeof(expect) - 1 == len) &&  ( memcmp(expect, actual, len) == 0 ) , expect, actual, "%s")
 
 
-static void TestParseNull() 
+
+static void TestParseNull()
 {
 	LeptValue v;
 
@@ -50,7 +53,7 @@ static void TestParseTrue()
 
 	v.type = LeptType::LEPT_FALSE;
 
-	EXPECT_EQ_INT(ParseState::LEPT_PARSE_SUCCESS, LeptParse("true", v) );
+	EXPECT_EQ_INT(ParseState::LEPT_PARSE_SUCCESS, LeptParse("true", v));
 	EXPECT_EQ_INT(LeptType::LEPT_TRUE, v.type);
 }
 
@@ -83,7 +86,7 @@ static void TestParseFalse()
 		}while(0)
 
 
-static void TestParseNumber() 
+static void TestParseNumber()
 {
 
 	TEST_NUMBER(0.0, "0");
@@ -157,7 +160,7 @@ static void TestParseInvalidValue()
 
 static void TestParseNumberTooBig()
 {
-	
+
 #if 0
 	TEST_ERROR(ParseState::LEPT_PARSE_NUMBER_TOO_BIG, "1e309");
 	TEST_ERROR(ParseState::LEPT_PARSE_NUMBER_TOO_BIG, "-1e309");
@@ -191,6 +194,7 @@ int main()
 
 	printf("\nTest Result : \n\n");
 	printf("%d / %d (%3.2f%%) passed\n", gTestPass, gTestCount, gTestPass * 100.0 / gTestCount);
-	
+
+	getchar();
 	return gMainReturn;
 }

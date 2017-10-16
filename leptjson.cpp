@@ -3,7 +3,7 @@
 double LeptGetNumber(const LeptValue & v)
 {
 	assert(v.type == LeptType::LEPT_NUMBER);
-	return v.number;
+	return v.u.number;
 }
 
 ParseState LeptParse(const char* json, LeptValue& v)
@@ -14,16 +14,16 @@ ParseState LeptParse(const char* json, LeptValue& v)
 	LeptContext context;
 	context.json = json;
 
-	//È¥µôjson×Ö·û´®¿ªÊ¼µÄ¿Õ°×·û
+	//åŽ»æŽ‰jsonå­—ç¬¦ä¸²å¼€å§‹çš„ç©ºç™½ç¬¦
 	LeptParseWhitespace(context);
-	
+
 	ParseState ret;
 	ret = LeptParseValue(context, v);
 
-	if ( ret == ParseState::LEPT_PARSE_SUCCESS) {
-		//È¥µô½âÎöÖµºóµÄ¿Õ¸ñ
+	if (ret == ParseState::LEPT_PARSE_SUCCESS) {
+		//åŽ»æŽ‰è§£æžå€¼åŽçš„ç©ºæ ¼
 		LeptParseWhitespace(context);
-		//Èç¹ûÈ¥µô¿Õ¸ñºó×Ö·û´®Ã»ÓÐ½áÊø
+		//å¦‚æžœåŽ»æŽ‰ç©ºæ ¼åŽå­—ç¬¦ä¸²æ²¡æœ‰ç»“æŸ
 		if (*context.json != '\0') {
 
 			v.type = LeptType::LEPT_NULL;
@@ -43,23 +43,23 @@ void LeptParseWhitespace(LeptContext & context)
 
 	while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')
 		p++;
-	
+
 	context.json = p;
 }
 
 ParseState LeptParseValue(LeptContext& context, LeptValue& v)
 {
-	switch ( *context.json ){
+	switch (*context.json) {
 
-		case 'n' :  return LeptParseNull(context, v);  
+	case 'n':  return LeptParseNull(context, v);
 
-		case 't' :  return LeptParseTrue(context, v);  
+	case 't':  return LeptParseTrue(context, v);
 
-		case 'f' :  return LeptParseFalse(context, v); 
+	case 'f':  return LeptParseFalse(context, v);
 
-		default:    return LeptParseNumber(context, v);
+	default:    return LeptParseNumber(context, v);
 
-		case '\0':  return ParseState::LEPT_PARSE_EXPECT_VALUE; 
+	case '\0':  return ParseState::LEPT_PARSE_EXPECT_VALUE;
 
 	}
 
@@ -83,7 +83,7 @@ ParseState LeptParseNull(LeptContext& context, LeptValue& v)
 
 		return ParseState::LEPT_PARSE_SUCCESS;
 	}
-	
+
 }
 
 ParseState LeptParseTrue(LeptContext & context, LeptValue & v)
@@ -114,7 +114,7 @@ ParseState LeptParseFalse(LeptContext & context, LeptValue & v)
 
 	context.json++;
 
-	if (context.json[0] != 'a' || context.json[1] != 'l' || context.json[2] != 's' || context.json[3] != 'e' ) {
+	if (context.json[0] != 'a' || context.json[1] != 'l' || context.json[2] != 's' || context.json[3] != 'e') {
 
 		return ParseState::LEPT_PARSE_INVALID_VALUE;
 
@@ -134,20 +134,20 @@ ParseState LeptParseNumber(LeptContext & context, LeptValue & v)
 	const char* json = context.json;
 
 	/*
-	jsonÊý×ÖµÄ¹¹³É
+	jsonæ•°å­—çš„æž„æˆ
 	number = [ "-" ] int [ frac ] [ exp ]
-	ÆäÖÐ
-	(0)¸ººÅ¿ÉÑ¡
+	å…¶ä¸­
+	(0)è´Ÿå·å¯é€‰
 	(1)int = "0" / digit1-9 *digit
 	(2)frac = "." 1*digit
 	(3)exp = ("e" / "E") ["-" / "+"] 1*digit
 	*/
 
-	/*(0)Ð£Ñé¸ººÅ*/
+	/*(0)æ ¡éªŒè´Ÿå·*/
 	if (*json == '-')
 		json++;
 
-	/*(1)Ð£Ñéint, Á½ÖÖÇé¿ö,*/
+	/*(1)æ ¡éªŒint, ä¸¤ç§æƒ…å†µ,*/
 	if (*json == '0') {
 		json++;
 	}
@@ -159,29 +159,29 @@ ParseState LeptParseNumber(LeptContext & context, LeptValue & v)
 
 	}
 
-	/*(2)Ð£ÑéÐ¡Êýµã*/
+	/*(2)æ ¡éªŒå°æ•°ç‚¹*/
 	if (*json == '.') {
-		//Ð¡ÊýµãºóÖÁÉÙÒ»Î»ÊÇÊý×Ö
+		//å°æ•°ç‚¹åŽè‡³å°‘ä¸€ä½æ˜¯æ•°å­—
 		json++;
 
 		if (!ISDIGIT(*json)) return ParseState::LEPT_PARSE_INVALID_VALUE;
-			
+
 		for (json++; ISDIGIT(*json); json++);
 
 	}
 
-	/*(3)Ð£ÑéÖ¸Êý²¿·Ö*/
+	/*(3)æ ¡éªŒæŒ‡æ•°éƒ¨åˆ†*/
 	if (*json == 'e' || *json == 'E') {
 		json++;
-		//Ìø¹ý'e'»òÕß'E'ºó,ºóÃæ¿ÉÒÔÓÐÕý¸ººÅ,¼ìÑé
-		/*(3.1)Ð£ÑéÌø¹ýE»òÕßeºó,ÊÇ·ñÓÐÕý¸ººÅ*/
+		//è·³è¿‡'e'æˆ–è€…'E'åŽ,åŽé¢å¯ä»¥æœ‰æ­£è´Ÿå·,æ£€éªŒ
+		/*(3.1)æ ¡éªŒè·³è¿‡Eæˆ–è€…eåŽ,æ˜¯å¦æœ‰æ­£è´Ÿå·*/
 		if (*json == '+' || *json == '-') json++;
 
-		/*(3.2)Ð£ÑéÌø¹ýÁËÕý¸ººÅºóºóÃæÊÇ·ñ¶¼ÎªÊý×Ö*/	
+		/*(3.2)æ ¡éªŒè·³è¿‡äº†æ­£è´Ÿå·åŽåŽé¢æ˜¯å¦éƒ½ä¸ºæ•°å­—*/
 		for (json++; ISDIGIT(*json); json++);
 	}
 
-	//¾­¹ýÉÏÊö´¦Àí,jsonÖ¸ÏòµÚÒ»¸ö²»ÎªÊý×ÖµÄ×Ö·û
+	//ç»è¿‡ä¸Šè¿°å¤„ç†,jsonæŒ‡å‘ç¬¬ä¸€ä¸ªä¸ä¸ºæ•°å­—çš„å­—ç¬¦
 
 	errno = 0;
 	double number = strtold(context.json, NULL);
@@ -190,7 +190,7 @@ ParseState LeptParseNumber(LeptContext & context, LeptValue & v)
 		return ParseState::LEPT_PARSE_NUMBER_TOO_BIG;
 
 
-	v.number = number;
+	v.u.number = number;
 	v.type = LeptType::LEPT_NUMBER;
 	context.json = json;
 
@@ -198,26 +198,108 @@ ParseState LeptParseNumber(LeptContext & context, LeptValue & v)
 
 
 	/*
-	errno : 
-	errno is set to zero at program startup, and 
-	any function of the standard C library can modify its value to some value different from zero, 
+	errno :
+	errno is set to zero at program startup, and
+	any function of the standard C library can modify its value to some value different from zero,
 	generally to signal specific categories of error
 
-	Éè¶¨errnoµÄ³õÊ¼ÖµÎª0,cµÄ±ê×¼¿âº¯ÊýÔÚÔËÐÐÊ±¿ÉÐÞ¸ÄËüµÄÖµ,Ò»°ãÊÇÓÉÒ»Ð©ºêÀ´¶¨ÒåµÄ
+	è®¾å®šerrnoçš„åˆå§‹å€¼ä¸º0,cçš„æ ‡å‡†åº“å‡½æ•°åœ¨è¿è¡Œæ—¶å¯ä¿®æ”¹å®ƒçš„å€¼,ä¸€èˆ¬æ˜¯ç”±ä¸€äº›å®æ¥å®šä¹‰çš„
 
 	ERANGE :
-	±íÊ¾Ò»¸ö·¶Î§´íÎó£¬ËüÔÚÊäÈë²ÎÊý³¬³öÊýÑ§º¯Êý¶¨ÒåµÄ·¶Î§Ê±·¢Éú£¬errno ±»ÉèÖÃÎª ERANGE¡£
+	è¡¨ç¤ºä¸€ä¸ªèŒƒå›´é”™è¯¯ï¼Œå®ƒåœ¨è¾“å…¥å‚æ•°è¶…å‡ºæ•°å­¦å‡½æ•°å®šä¹‰çš„èŒƒå›´æ—¶å‘ç”Ÿï¼Œerrno è¢«è®¾ç½®ä¸º ERANGEã€‚
 
 	Macro constant that expands to a positive expression of type double.
 
 	HUGE_VAL:
 
-	A function returns this value when the result of a mathematical operation yields a value 
+	A function returns this value when the result of a mathematical operation yields a value
 	that is too large in magnitude to be representable with its return type
 
-	Actually, functions may either return a positive or a negative HUGE_VAL (HUGE_VAL or -HUGE_VAL) 
+	Actually, functions may either return a positive or a negative HUGE_VAL (HUGE_VAL or -HUGE_VAL)
 	to indicate the sign of the result.
 
 
 	*/
+}
+
+ParseState LeptParseString(LeptContext & context, LeptValue& v)
+{
+	size_t head = context.top, len;
+	const char* p = context.json;
+
+	while (true) {
+
+		char c = *p++;
+		switch (c) {
+			case '\"':
+				len = context.top - head;
+				LeptSetString((const char*)LeptContextPop(context, len), len, v);
+				context.json = p;
+				return ParseState::LEPT_PARSE_SUCCESS;
+			break;
+
+			case '\0':
+				context.top = head;
+		}
+
+	}
+}
+
+void LeptSetString(const char * s, size_t len, LeptValue & v)
+{
+	assert((s != NULL) || (len != 0));
+
+	v.u.str.s = (char*)malloc(len + 1);
+
+	memcpy(v.u.str.s, s, len);
+
+	v.u.str.s[len] = '\0';
+	v.u.str.len = len;
+
+	v.type = LeptType::LEPT_STRING;
+
+}
+
+void LeptFreeString(LeptValue & v)
+{
+	assert(v.u.str.s != NULL);
+
+	free(v.u.str.s);
+	v.u.str.s = NULL;
+}
+
+void * LeptContextPush(LeptContext & c, size_t size)
+{
+	assert(size > 0);
+
+	void* ret;
+	
+	//è¶…è¿‡äº†å½“å‰æ ˆçš„size,æ‰©å……æ ˆ
+	if (c.top + size >= c.size) {
+
+		//è¿˜æœªç»™æ ˆåˆ†é…å†…å­˜
+		if (c.size == 0) {
+			c.size = LEPT_PARSE_STACK_INIT_SIZE;
+		}
+
+		while (c.top + size >= c.size) {
+			//1.5å€åˆ†é…
+			c.size += c.size >> 1;
+		}
+
+		c.stack = (char*)realloc(c.stack, c.size);
+
+	}
+
+	ret = c.stack + c.top;
+	c.top += size;
+
+	return ret;
+
+}
+
+void * LeptContextPop(LeptContext & c, size_t size)
+{
+	assert(c.top >= size && size > 0);
+	return c.stack + (c.top -= size);
 }
