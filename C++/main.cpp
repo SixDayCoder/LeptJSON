@@ -4,8 +4,9 @@
 int main() 
 {
 	
-	TestUnit::Instance().TestPareNull();
+	TestUnit::Instance().TestParseAll();
 
 	TestUnit::Instance().TestResult();
+
 	return 0;
 }

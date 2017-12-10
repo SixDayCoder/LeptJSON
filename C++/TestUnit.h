@@ -23,7 +23,19 @@ private:
 public:
 	static TestUnit& Instance();
 
+	void TestParseAll();
+
 	void TestPareNull();
+
+	void TestParseTrue();
+
+	void TestParseFalse();
+
+	void TestParseValue();
+
+	void TestParseNotSingular();
+
+	void TestParseInvalidValue();
 
 	void TestResult();
 

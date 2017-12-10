@@ -4,7 +4,7 @@
 #include "LeptJsonDefine.h"
 #include <assert.h>
 
-class LeptJsonParse 
+class LeptJsonParser 
 {
 private:
 	//解析后的值
@@ -14,24 +14,34 @@ private:
 
 public:
 	//解析 空格 Tab 回车
-	LeptParseRet LeptParseWhiteSpace(const char* json = nullptr);
+	LeptParseRet LeptParseWhiteSpace();
+
+	//解析json的值
+	LeptParseRet LeptParseValue();
 
 	//解析字面值 包括null false true
-	LeptParseRet LeptParseLiteral(const char* json, const char* literal);
+	LeptParseRet LeptParseLiteral(const char* literal);
+
+
 
 public:
-	LeptJsonParse() {}
-	LeptJsonParse(const char* json);
+	LeptJsonParser() {}
+	LeptJsonParser(const LeptContext& context);
 	LeptParseRet Parse();
 
 	LeptValue GetLeptValue()const {
 		return m_LeptValue;
 	}
-
-	LeptContext GetLepContext() {
-		return m_LeptContext;
+	void ChangeLeptValueType(LeptType type) {
+		m_LeptValue.type = type;
 	}
 
+	LeptContext GetLeptContext() {
+		return m_LeptContext;
+	}
+	void ChangeLeptContextJson(const char* json) {
+		m_LeptContext.json = json;
+	}
 
 };
 
