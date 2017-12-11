@@ -37,6 +37,10 @@ public:
 
 	void TestParseInvalidValue();
 
+	void TestParseNumber(double n, const char* strNumber);
+
+	void TestParseAllNumber();
+
 	void TestResult();
 
 //类内模板函数,判断expect和actual是否相等

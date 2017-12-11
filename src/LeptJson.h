@@ -12,6 +12,15 @@ private:
 	//解析器的上下文
 	LeptContext m_LeptContext;
 
+private: 
+	bool IsDigit1To9(char ch) {
+		return (ch >= '1' && ch <= '9');
+	}
+
+	bool IsDigit(char ch) {
+		return (ch >= '0' && ch <= '9');
+	}
+
 public:
 	//解析 空格 Tab 回车
 	LeptParseRet LeptParseWhiteSpace();
@@ -22,7 +31,8 @@ public:
 	//解析字面值 包括null false true
 	LeptParseRet LeptParseLiteral(const char* literal);
 
-
+	//解析数字,结果放到LeptValue的number字段
+	LeptParseRet LeptParseNumber();
 
 public:
 	LeptJsonParser() {}
