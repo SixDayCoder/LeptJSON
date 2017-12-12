@@ -27,6 +27,8 @@ enum class LeptParseRet
 	LEPT_PARSE_INVALID_VALUE,
 	LEPT_PARSE_ROOT_NOT_SINGULAR,
 	LEPT_PARSE_STRING_MISS_QUOTATION_MARK,
+	LEPT_PARSE_STRING_INVALID_ESCAPE,//解析到了非法的转义符
+	LEPT_PARSE_STRING_INVALID_CHAR,
 	LEPT_PARSE_NUMBER_TOO_BIG
 };
 
@@ -64,11 +66,11 @@ struct LeptString {
 
 struct LeptValue 
 {
-	LeptString str;
-
-
-	double number;
 	LeptType type;
+
+	LeptString str;
+	double number;
+	
 	
 	void Init() {
 		type = LeptType::LEPT_NULL;
@@ -96,12 +98,10 @@ struct LeptValue
 		return str;
 	}
 
-	void CleanUp() {
-
+	void CleanUp(){
 		type = LeptType::LEPT_NULL;
 		number = 0.0f;
 		str.CleanUp();
-
 	}
 
 };
@@ -113,6 +113,11 @@ struct LeptBufferStack {
 	int32_t size;
 	int32_t top;
 
+	void Init() {
+		stack = nullptr;
+		size = top = 0;
+	}
+
 	void CleanUp() {
 		if (stack != nullptr) {
 			free(stack);
@@ -122,7 +127,9 @@ struct LeptBufferStack {
 	}
 
 	void PutChar(char ch) {
-		*Push(1) = ch;
+		char* base = Push(sizeof(char));
+		if(base != nullptr)
+			*base = ch;
 	}
 
 	//返回push前的数据起始指针
@@ -158,6 +165,16 @@ struct LeptContext
 {
 	const char* json;
 	LeptBufferStack stack;
+
+	void Init() {
+		json = nullptr;
+		stack.Init();
+	}
+
+	void CleanUp() {
+		json = nullptr;
+		stack.CleanUp();
+	}
 };
 
 

@@ -27,6 +27,8 @@ void TestUnit::TestParseAll()
 
 	TestParseAllNumber();
 	
+	TestParseString();
+
 	TestAccessString();
 }
 
@@ -206,14 +208,31 @@ void TestUnit::TestParseAllNumber()
 	TestParseNumber(-1.7976931348623157e+308, "-1.7976931348623157e+308");
 }
 
+void TestUnit::TestParseString()
+{
+	LeptContext context;
+	context.Init();
+	context.json = "\"hello world\"";
+	LeptJsonParser parser(context);
+
+	LeptValue value;
+
+	IsExpectEqActual(LeptParseRet::LEPT_PARSE_OK, parser.Parse(), "%d");
+	value = parser.GetLeptValue();
+
+	IsExpectEqActual(LeptType::LEPT_STRING, value.type, "%d");
+	IsExpectEqActual(static_cast<const char*>("hello world"), static_cast<const char*>(value.GetString().cstr), "%s");
+
+}
+
 void TestUnit::TestAccessString()
 {
-	/*LeptValue value;
+	LeptValue value;
 	value.Init();
 	value.SetString("", 0);
-	IsExpectEqActual<const char*, const char*>(static_cast<const char*>(""), static_cast<const char*>(value.str.cstr), "%s");
+	IsExpectEqActual(static_cast<const char*>(""), static_cast<const char*>(value.str.cstr), "%s");
 	value.SetString("hello", 5);
-	IsExpectEqActual<const char*, const char*>(static_cast<const char*>("hello"), static_cast<const char*>(value.str.cstr), "%s");*/
+	IsExpectEqActual(static_cast<const char*>("hello"), static_cast<const char*>(value.str.cstr), "%s");
 }
 
 void TestUnit::TestResult()

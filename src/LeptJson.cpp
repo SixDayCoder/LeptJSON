@@ -6,6 +6,8 @@
 
 LeptJsonParser::LeptJsonParser(const LeptContext & context)
 {
+	m_LeptContext.Init();
+	m_LeptValue.Init();
 	m_LeptContext = context;
 }
 
@@ -24,12 +26,12 @@ LeptParseRet LeptJsonParser::LeptParseValue()
 	const char* p = m_LeptContext.json;
 
 	switch (*p){
-		case 'n':  return LeptParseLiteral("null");  break;
-		case 'f':  return LeptParseLiteral("false"); break;
-		case 't':  return LeptParseLiteral("true");  break;
-		case '"':  return LeptParseString(); break;
-		case '\0': return LeptParseRet::LEPT_PARSE_EXPCET_VALUE; break;
-		default:   return LeptParseNumber(); break;
+		case 'n':   return LeptParseLiteral("null");  break;
+		case 'f':   return LeptParseLiteral("false"); break;
+		case 't':   return LeptParseLiteral("true");  break;
+		case '\"':  return LeptParseString(); break;
+		case '\0':  return LeptParseRet::LEPT_PARSE_EXPCET_VALUE; break;
+		default:    return LeptParseNumber(); break;
 	}
 }
 
@@ -190,12 +192,12 @@ LeptParseRet LeptJsonParser::LeptParseString()
 	int32_t head = m_LeptContext.stack.top;
 	const char* p = nullptr;
 
-	/*
-	assert(*m_LeptContext.json == '"');
+	//json字符串的格式如下
+	// " text | escape-char ",两边是双引号,中间可能有转义字符
+
+	//字符串开头必须是双引号
+	assert(*m_LeptContext.json == '\"');
 	m_LeptContext.json++;
-	if (*m_LeptContext.json == '"')
-		m_LeptContext.json++;
-	*/
 
 	p = m_LeptContext.json;
 
@@ -205,7 +207,7 @@ LeptParseRet LeptJsonParser::LeptParseString()
 
 		switch (ch){
 			//解析到了完整的字符串
-			case '"': {
+			case '\"': {
 				//解析的字符串的长度
 				int32_t len = m_LeptContext.stack.top - head;
 				//解析的字符串的起始地址
@@ -223,9 +225,46 @@ LeptParseRet LeptJsonParser::LeptParseString()
 			}
 			break;
 
+			//若碰到转义字符
+			case '\\': {
+
+				char ch = *p++;
+
+				switch (ch) {
+					//如果是双引号的另一部分
+					case '\"':m_LeptContext.stack.PutChar('\"'); break;
+					//如果还是转义字符
+					case '\\':m_LeptContext.stack.PutChar('\\'); break;
+					//如果是反斜杠
+					case '/': m_LeptContext.stack.PutChar('/'); break;
+					//如果是退后符
+					case 'b': m_LeptContext.stack.PutChar('\b'); break;
+					//如果是换页符
+					case 'f': m_LeptContext.stack.PutChar('\f'); break;
+					//如果是换行符
+					case 'n': m_LeptContext.stack.PutChar('\n'); break;
+					//如果是回车符
+					case 'r': m_LeptContext.stack.PutChar('\r'); break;
+					//如果是制表符
+					case 't': m_LeptContext.stack.PutChar('\t'); break;
+					//其他情况是不合法的转义字符
+					default:
+						m_LeptContext.stack.top = head;
+						return LeptParseRet::LEPT_PARSE_STRING_INVALID_ESCAPE;
+					break;
+
+				}
+
+			}
 			//put一个字符
 			default:
-				m_LeptContext.stack.PutChar(ch);
+				if ((unsigned char)ch < 0x20) {
+					m_LeptContext.stack.top = head;
+					return LeptParseRet::LEPT_PARSE_STRING_INVALID_CHAR;
+				}
+				else {
+					m_LeptContext.stack.PutChar(ch);
+				}
 			break;
 		}
 	}

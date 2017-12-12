@@ -41,6 +41,8 @@ public:
 
 	void TestParseAllNumber();
 
+	void TestParseString();
+	
 	void TestAccessString();
 
 	void TestResult();
@@ -69,10 +71,10 @@ private:
 	}
 
 	//ÌØ»¯const char*°æ±¾
-	/*template<>
-	bool IsExpectEqActual<const char*, const char*>(const char* const& expcet, const char* const& actual, const char* format) {
+	template<>
+	bool IsExpectEqActual(const char* const& expect, const char* const& actual, const char* format) {
 		sTestCount++;
-		if (strcmp(expcet,actual) == 0) {
+		if (strcmp(expect,actual) == 0) {
 			sTestPass++;
 			return true;
 		}
@@ -86,7 +88,7 @@ private:
 			fprintf(stderr, "\n");
 			return false;
 		}
-	}*/
+	}
 };
 
 
