@@ -41,6 +41,8 @@ public:
 
 	void TestParseAllNumber();
 
+	void TestAccessString();
+
 	void TestResult();
 
 //类内模板函数,判断expect和actual是否相等
@@ -65,6 +67,26 @@ private:
 			return false;
 		}
 	}
+
+	//特化const char*版本
+	/*template<>
+	bool IsExpectEqActual<const char*, const char*>(const char* const& expcet, const char* const& actual, const char* format) {
+		sTestCount++;
+		if (strcmp(expcet,actual) == 0) {
+			sTestPass++;
+			return true;
+		}
+		else {
+
+			std::string strFormat;
+			strFormat = std::string("%s:%d expect :") + std::string(format) +
+				std::string(" actual : ") + std::string(format);
+
+			fprintf(stderr, strFormat.c_str(), __FILE__, __LINE__, expect, actual);
+			fprintf(stderr, "\n");
+			return false;
+		}
+	}*/
 };
 
 

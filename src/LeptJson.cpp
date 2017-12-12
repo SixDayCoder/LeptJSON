@@ -9,7 +9,6 @@ LeptJsonParser::LeptJsonParser(const LeptContext & context)
 	m_LeptContext = context;
 }
 
-
 LeptParseRet LeptJsonParser::LeptParseWhiteSpace()
 {
 	const char *p = m_LeptContext.json;
@@ -17,7 +16,7 @@ LeptParseRet LeptJsonParser::LeptParseWhiteSpace()
 		p++;
 	m_LeptContext.json = p;
 
-	return LeptParseRet::LEPT_PASER_OK;
+	return LeptParseRet::LEPT_PARSE_OK;
 }
 
 LeptParseRet LeptJsonParser::LeptParseValue()
@@ -28,6 +27,7 @@ LeptParseRet LeptJsonParser::LeptParseValue()
 		case 'n':  return LeptParseLiteral("null");  break;
 		case 'f':  return LeptParseLiteral("false"); break;
 		case 't':  return LeptParseLiteral("true");  break;
+		case '"':  return LeptParseString(); break;
 		case '\0': return LeptParseRet::LEPT_PARSE_EXPCET_VALUE; break;
 		default:   return LeptParseNumber(); break;
 	}
@@ -47,7 +47,7 @@ LeptParseRet LeptJsonParser::LeptParseLiteral(const char * literal)
 			else {
 				m_LeptContext.json += 4;
 				m_LeptValue.type = LeptType::LEPT_NULL;
-				return LeptParseRet::LEPT_PASER_OK;
+				return LeptParseRet::LEPT_PARSE_OK;
 			}
 		}
 		break;
@@ -60,7 +60,7 @@ LeptParseRet LeptJsonParser::LeptParseLiteral(const char * literal)
 			else {
 				m_LeptContext.json += 5;
 				m_LeptValue.type = LeptType::LEPT_FALSE;
-				return LeptParseRet::LEPT_PASER_OK;
+				return LeptParseRet::LEPT_PARSE_OK;
 			}
 		}
 		break;
@@ -73,7 +73,7 @@ LeptParseRet LeptJsonParser::LeptParseLiteral(const char * literal)
 			else {
 				m_LeptContext.json += 4;
 				m_LeptValue.type = LeptType::LEPT_TRUE;
-				return LeptParseRet::LEPT_PASER_OK;
+				return LeptParseRet::LEPT_PARSE_OK;
 			}
 		}
 		break;
@@ -164,7 +164,7 @@ LeptParseRet LeptJsonParser::LeptParseNumber()
 
 	m_LeptContext.json = p;
 
-	return LeptParseRet::LEPT_PASER_OK;
+	return LeptParseRet::LEPT_PARSE_OK;
 
 
 	/*
@@ -185,7 +185,51 @@ LeptParseRet LeptJsonParser::LeptParseNumber()
 	*/
 }
 
+LeptParseRet LeptJsonParser::LeptParseString()
+{
+	int32_t head = m_LeptContext.stack.top;
+	const char* p = nullptr;
 
+	/*
+	assert(*m_LeptContext.json == '"');
+	m_LeptContext.json++;
+	if (*m_LeptContext.json == '"')
+		m_LeptContext.json++;
+	*/
+
+	p = m_LeptContext.json;
+
+	while (true) {
+
+		char ch = *p++;
+
+		switch (ch){
+			//解析到了完整的字符串
+			case '"': {
+				//解析的字符串的长度
+				int32_t len = m_LeptContext.stack.top - head;
+				//解析的字符串的起始地址
+				const char* str = m_LeptContext.stack.Pop(len);
+				m_LeptValue.SetString(str, len);
+				m_LeptContext.json = p;
+				return LeptParseRet::LEPT_PARSE_OK;
+			}
+			break;
+
+			//未解析完字符串就碰到了结束标志
+			case '\0': {
+				m_LeptContext.stack.top = head;
+				return LeptParseRet::LEPT_PARSE_STRING_MISS_QUOTATION_MARK;
+			}
+			break;
+
+			//put一个字符
+			default:
+				m_LeptContext.stack.PutChar(ch);
+			break;
+		}
+	}
+}
 
 LeptParseRet LeptJsonParser::Parse()
 {
@@ -199,14 +243,14 @@ LeptParseRet LeptJsonParser::Parse()
 	LeptParseWhiteSpace();
 	//2.如果解析json的text成功那么去掉后面的空格
 	ret = LeptParseValue();
-	if (ret == LeptParseRet::LEPT_PASER_OK) {
+	if (ret == LeptParseRet::LEPT_PARSE_OK) {
 		LeptParseWhiteSpace();
 		//3.如果解析空格完毕后不是字符串的结束,说明json的解析树有两个根
 		if ((*m_LeptContext.json) != '\0') {
 			return LeptParseRet::LEPT_PARSE_ROOT_NOT_SINGULAR;
 		}
 		else {
-			return LeptParseRet::LEPT_PASER_OK;
+			return LeptParseRet::LEPT_PARSE_OK;
 		}
 		
 	}

@@ -22,17 +22,20 @@ private:
 	}
 
 public:
-	//解析 空格 Tab 回车
+	//解析空白字符
 	LeptParseRet LeptParseWhiteSpace();
 
 	//解析json的值
 	LeptParseRet LeptParseValue();
 
-	//解析字面值 包括null false true
+	//解析字面值(null false true)
 	LeptParseRet LeptParseLiteral(const char* literal);
 
-	//解析数字,结果放到LeptValue的number字段
+	//解析数字
 	LeptParseRet LeptParseNumber();
+
+	//解析字符串
+	LeptParseRet LeptParseString();
 
 public:
 	LeptJsonParser() {}

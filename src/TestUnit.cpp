@@ -26,6 +26,8 @@ void TestUnit::TestParseAll()
 	TestParseInvalidValue();
 
 	TestParseAllNumber();
+	
+	TestAccessString();
 }
 
 void TestUnit::TestPareNull()
@@ -36,7 +38,7 @@ void TestUnit::TestPareNull()
 
 	//1.测试解析null是否成功
 	parser.ChangeLeptValueType(LeptType::LEPT_OBJECT);
-	IsExpectEqActual(LeptParseRet::LEPT_PASER_OK, parser.Parse(), "%d");
+	IsExpectEqActual(LeptParseRet::LEPT_PARSE_OK, parser.Parse(), "%d");
 
 	//2.测试解析null后类型是否改变为null
 	LeptValue value = parser.GetLeptValue();
@@ -52,7 +54,7 @@ void TestUnit::TestParseTrue()
 
 	//1.测试解析true是否成功
 	parser.ChangeLeptValueType(LeptType::LEPT_OBJECT);
-	IsExpectEqActual(LeptParseRet::LEPT_PASER_OK, parser.Parse(), "%d");
+	IsExpectEqActual(LeptParseRet::LEPT_PARSE_OK, parser.Parse(), "%d");
 
 	//2.测试解析null后类型是否改变为true
 	LeptValue value = parser.GetLeptValue();
@@ -69,7 +71,7 @@ void TestUnit::TestParseFalse()
 	
 	//1.测试解析false是否成功
 	parser.ChangeLeptValueType(LeptType::LEPT_OBJECT);
-	IsExpectEqActual(LeptParseRet::LEPT_PASER_OK, parser.Parse(), "%d");
+	IsExpectEqActual(LeptParseRet::LEPT_PARSE_OK, parser.Parse(), "%d");
 
 	//2.测试解析null后类型是否改变为false
 	LeptValue value = parser.GetLeptValue();
@@ -163,7 +165,7 @@ void TestUnit::TestParseNumber(double n, const char* strNumber)
 	LeptJsonParser parser(context);
 
 	//是否成功解析数字
-	IsExpectEqActual(LeptParseRet::LEPT_PASER_OK, parser.Parse(),"%d");
+	IsExpectEqActual(LeptParseRet::LEPT_PARSE_OK, parser.Parse(),"%d");
 
 	LeptValue value = parser.GetLeptValue();
 	//解析完毕后类型是否变为LEPT_NUMBER
@@ -202,6 +204,16 @@ void TestUnit::TestParseAllNumber()
 	TestParseNumber(-2.2250738585072014e-308, "-2.2250738585072014e-308");
 	TestParseNumber(1.7976931348623157e+308, "1.7976931348623157e+308");  /* Max double */
 	TestParseNumber(-1.7976931348623157e+308, "-1.7976931348623157e+308");
+}
+
+void TestUnit::TestAccessString()
+{
+	/*LeptValue value;
+	value.Init();
+	value.SetString("", 0);
+	IsExpectEqActual<const char*, const char*>(static_cast<const char*>(""), static_cast<const char*>(value.str.cstr), "%s");
+	value.SetString("hello", 5);
+	IsExpectEqActual<const char*, const char*>(static_cast<const char*>("hello"), static_cast<const char*>(value.str.cstr), "%s");*/
 }
 
 void TestUnit::TestResult()
