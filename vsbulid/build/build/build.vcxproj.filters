@@ -24,6 +24,9 @@
     <ClInclude Include="..\..\..\src\TestUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\LeptJsonValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\LeptJson.cpp">
@@ -33,6 +36,9 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\TestUnit.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\LeptJsonValue.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>

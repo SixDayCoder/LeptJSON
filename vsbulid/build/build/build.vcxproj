@@ -148,10 +148,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\LeptJson.h" />
     <ClInclude Include="..\..\..\src\LeptJsonDefine.h" />
+    <ClInclude Include="..\..\..\src\LeptJsonValue.h" />
     <ClInclude Include="..\..\..\src\TestUnit.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\LeptJson.cpp" />
+    <ClCompile Include="..\..\..\src\LeptJsonValue.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\src\TestUnit.cpp" />
   </ItemGroup>
