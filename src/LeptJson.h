@@ -22,20 +22,23 @@ private:
 	}
 
 public:
-	//解析空白字符
-	LeptParseRet LeptParseWhiteSpace();
+	//跳过空白字符
+	void SkipWhiteSpace(LeptContext& context);
 
 	//解析json的值
-	LeptParseRet LeptParseValue();
+	LeptParseRet LeptParseValue(LeptContext& context, LeptValue& value);
 
 	//解析字面值(null false true)
-	LeptParseRet LeptParseLiteral(const char* literal);
+	LeptParseRet LeptParseLiteral(LeptContext& context, const char* literal, LeptValue& value);
 
 	//解析数字
-	LeptParseRet LeptParseNumber();
+	LeptParseRet LeptParseNumber(LeptContext& context, LeptValue& value);
 
 	//解析字符串
-	LeptParseRet LeptParseString();
+	LeptParseRet LeptParseString(LeptContext& context, LeptValue& value);
+
+	//解析数组
+	LeptParseRet LeptParseArray(LeptContext& context, LeptValue& value);
 
 public:
 	LeptJsonParser() {}

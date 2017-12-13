@@ -47,6 +47,8 @@ public:
 	
 	void TestAccessString();
 
+	void TestParseArray();
+
 	void TestResult();
 
 //类内模板函数,判断expect和actual是否相等

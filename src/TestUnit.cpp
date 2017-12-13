@@ -13,23 +13,25 @@ TestUnit& TestUnit::Instance()
 
 void TestUnit::TestParseAll()
 {
-	TestPareNull();
+	//TestPareNull();
 
-	TestParseFalse();
+	//TestParseFalse();
 
-	TestParseTrue();
+	//TestParseTrue();
 
-	TestParseValue();
+	//TestParseValue();
 
-	TestParseNotSingular();
+	//TestParseNotSingular();
 
-	TestParseInvalidValue();
+	//TestParseInvalidValue();
 
-	TestParseAllNumber();
+	//TestParseAllNumber();
+
+	//TestParseAllString();
+
+	//TestAccessString();
 	
-	TestParseAllString();
-
-	TestAccessString();
+	TestParseArray();
 }
 
 void TestUnit::TestPareNull()
@@ -279,6 +281,37 @@ void TestUnit::TestAccessString()
 	IsExpectEqActual(static_cast<const char*>(""), static_cast<const char*>(value.str.cstr), "%s");
 	value.SetString("hello", 5);
 	IsExpectEqActual(static_cast<const char*>("hello"), static_cast<const char*>(value.str.cstr), "%s");
+}
+
+void TestUnit::TestParseArray()
+{
+	LeptContext context;
+	context.Init();
+	context.json = "[]";
+	LeptValue value;
+	value.Init();
+
+	LeptJsonParser parser(context);
+
+	IsExpectEqActual(LeptParseRet::LEPT_PARSE_OK, parser.Parse(), "%d");
+	value = parser.GetLeptValue();
+	IsExpectEqActual(LeptType::LEPT_ARRAY, value.type, "%d");
+
+	parser.ChangeLeptContextJson("[123, \"string\", [], null]");
+	IsExpectEqActual(LeptParseRet::LEPT_PARSE_OK, parser.Parse(), "%d");
+	value = parser.GetLeptValue();
+
+	LeptArray x = value.GetArray();
+	printf("count : %d\n", x.values.size());
+	const LeptValue* value1 = x.values[0];
+	printf("type : %d, %.17g\n", value1->type, value1->number);
+	const LeptValue* value2 = x.values[1];
+	printf("type : %d, %s\n", value2->type, value2->str.cstr);
+	printf("type : %d\n", x.values[2]->type);
+	printf("type : %d\n", x.values[3]->type);
+
+	IsExpectEqActual(LeptType::LEPT_ARRAY, value.type, "%d");
+
 }
 
 void TestUnit::TestResult()
