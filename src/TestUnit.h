@@ -41,7 +41,9 @@ public:
 
 	void TestParseAllNumber();
 
-	void TestParseString();
+	void TestParseString(const char* src, const char* json);
+
+	void TestParseAllString();
 	
 	void TestAccessString();
 

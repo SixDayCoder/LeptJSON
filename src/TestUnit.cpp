@@ -27,7 +27,7 @@ void TestUnit::TestParseAll()
 
 	TestParseAllNumber();
 	
-	TestParseString();
+	TestParseAllString();
 
 	TestAccessString();
 }
@@ -35,6 +35,7 @@ void TestUnit::TestParseAll()
 void TestUnit::TestPareNull()
 {
 	LeptContext context;
+	context.Init();
 	context.json = "null";
 	LeptJsonParser parser(context);
 
@@ -50,6 +51,7 @@ void TestUnit::TestPareNull()
 void TestUnit::TestParseTrue()
 {
 	LeptContext context;
+	context.Init();
 	context.json = "  true";
 	LeptJsonParser parser(context);
 
@@ -67,6 +69,7 @@ void TestUnit::TestParseTrue()
 void TestUnit::TestParseFalse()
 {
 	LeptContext context;
+	context.Init();
 	context.json = "  false  ";
 	LeptJsonParser parser(context);
 
@@ -83,6 +86,7 @@ void TestUnit::TestParseFalse()
 void TestUnit::TestParseValue()
 {
 	LeptContext context;
+	context.Init();
 	context.json = "";
 	LeptJsonParser parser(context);
 
@@ -97,6 +101,7 @@ void TestUnit::TestParseValue()
 void TestUnit::TestParseNotSingular()
 {
 	LeptContext context;
+	context.Init();
 	context.json = "  null x";
 	LeptJsonParser parser(context);
 	
@@ -111,10 +116,12 @@ void TestUnit::TestParseNotSingular()
 void TestUnit::TestParseInvalidValue()
 {
 	LeptContext context;
+	context.Init();
 	context.json = "  nul";
 	LeptJsonParser parser(context);
 
 	LeptValue value;
+	value.Init();
 
 	//(1)´íÎóµÄjsonÖµ nul
 	parser.ChangeLeptValueType(LeptType::LEPT_OBJECT);
@@ -163,6 +170,7 @@ void TestUnit::TestParseInvalidValue()
 void TestUnit::TestParseNumber(double n, const char* strNumber)
 {
 	LeptContext context;
+	context.Init();
 	context.json = strNumber;
 	LeptJsonParser parser(context);
 
@@ -208,11 +216,11 @@ void TestUnit::TestParseAllNumber()
 	TestParseNumber(-1.7976931348623157e+308, "-1.7976931348623157e+308");
 }
 
-void TestUnit::TestParseString()
+void TestUnit::TestParseString(const char* src, const char* json)
 {
 	LeptContext context;
 	context.Init();
-	context.json = "\"hello world\"";
+	context.json = json;
 	LeptJsonParser parser(context);
 
 	LeptValue value;
@@ -221,7 +229,45 @@ void TestUnit::TestParseString()
 	value = parser.GetLeptValue();
 
 	IsExpectEqActual(LeptType::LEPT_STRING, value.type, "%d");
-	IsExpectEqActual(static_cast<const char*>("hello world"), static_cast<const char*>(value.GetString().cstr), "%s");
+	IsExpectEqActual(src, static_cast<const char*>(value.GetString().cstr), "%s");
+
+}
+
+void TestUnit::TestParseAllString()
+{
+	TestParseString("hello world", "\"hello world\"");
+	TestParseString("", "\"\"");
+	TestParseString("hello\n world", "\"hello\\n world\"");
+	TestParseString("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
+
+	//invalid escape
+	LeptContext context;
+	context.Init();
+
+	LeptValue value;
+	value.Init();
+
+	context.json = "\"\\v\"";
+	LeptJsonParser parser(context);
+
+	IsExpectEqActual(LeptParseRet::LEPT_PARSE_STRING_INVALID_ESCAPE, parser.Parse(), "%d");
+	value = parser.GetLeptValue();
+	IsExpectEqActual(LeptType::LEPT_NULL, value.type, "%d");
+
+	parser.ChangeLeptContextJson("\"\\'\"");
+	IsExpectEqActual(LeptParseRet::LEPT_PARSE_STRING_INVALID_ESCAPE, parser.Parse(), "%d");
+	value = parser.GetLeptValue();
+	IsExpectEqActual(LeptType::LEPT_NULL, value.type, "%d");
+
+	parser.ChangeLeptContextJson("\"\\0\"");
+	IsExpectEqActual(LeptParseRet::LEPT_PARSE_STRING_INVALID_ESCAPE, parser.Parse(), "%d");
+	value = parser.GetLeptValue();
+	IsExpectEqActual(LeptType::LEPT_NULL, value.type, "%d");
+
+	parser.ChangeLeptContextJson("\"\\x12\"");
+	IsExpectEqActual(LeptParseRet::LEPT_PARSE_STRING_INVALID_ESCAPE, parser.Parse(), "%d");
+	value = parser.GetLeptValue();
+	IsExpectEqActual(LeptType::LEPT_NULL, value.type, "%d");
 
 }
 

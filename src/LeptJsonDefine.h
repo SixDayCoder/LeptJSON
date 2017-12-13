@@ -44,12 +44,20 @@ struct LeptString {
 	}
 
 	void SetString(const char* str, int32_t len) {
-		assert((str != nullptr) && (len >= 0));
 
+		assert( ( (str != nullptr) && (len >= 0) ) ||  ( (str == nullptr) && (len == 0) ) );
+		
 		CleanUp();//Çå¿ÕÔ­Öµ
+
 		cstr = (char*)malloc(len + 1);
-		memcpy(cstr, str, len);
-		cstr[len] = '\0';//C·ç¸ñ×Ö·û´®
+		//¿Õ×Ö·û´®
+		if (str == nullptr && len == 0) {
+			cstr[0] = '\0';
+		}
+		else {
+			memcpy(cstr, str, len);
+			cstr[len] = '\0';//C·ç¸ñ×Ö·û´®
+		}
 		this->len = len;
 
 	}

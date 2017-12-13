@@ -218,19 +218,10 @@ LeptParseRet LeptJsonParser::LeptParseString()
 			}
 			break;
 
-			//未解析完字符串就碰到了结束标志
-			case '\0': {
-				m_LeptContext.stack.top = head;
-				return LeptParseRet::LEPT_PARSE_STRING_MISS_QUOTATION_MARK;
-			}
-			break;
-
 			//若碰到转义字符
 			case '\\': {
 
-				char ch = *p++;
-
-				switch (ch) {
+				switch (*p++) {
 					//如果是双引号的另一部分
 					case '\"':m_LeptContext.stack.PutChar('\"'); break;
 					//如果还是转义字符
@@ -250,21 +241,34 @@ LeptParseRet LeptJsonParser::LeptParseString()
 					//其他情况是不合法的转义字符
 					default:
 						m_LeptContext.stack.top = head;
+						m_LeptValue.type = LeptType::LEPT_NULL;
 						return LeptParseRet::LEPT_PARSE_STRING_INVALID_ESCAPE;
 					break;
 
 				}
 
 			}
+			break;
+
+			//未解析完字符串就碰到了结束标志
+			case '\0': {
+				m_LeptContext.stack.top = head;
+				m_LeptValue.type = LeptType::LEPT_NULL;
+				return LeptParseRet::LEPT_PARSE_STRING_MISS_QUOTATION_MARK;
+			}
+			break;
+
 			//put一个字符
-			default:
+			default: {
 				if ((unsigned char)ch < 0x20) {
 					m_LeptContext.stack.top = head;
+					m_LeptValue.type = LeptType::LEPT_NULL;
 					return LeptParseRet::LEPT_PARSE_STRING_INVALID_CHAR;
 				}
 				else {
 					m_LeptContext.stack.PutChar(ch);
 				}
+			}
 			break;
 		}
 	}
