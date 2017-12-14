@@ -9,7 +9,13 @@ namespace leptjson {
 	enum class LeptJsonParseRet
 	{
 		LEPT_JSON_PARSE_SUCCESS,
-		LEPT_JSON_PARSE_INVALID_VALUE
+		LEPT_JSON_PARSE_INVALID_LITERAL,
+		LEPT_JSON_PARSE_INVALID_NUMBER,
+		LEPT_JSON_PARSE_INVALID_STRING,
+		LEPT_JSON_PARSE_INVALID_ARRAY,
+		LEPT_JSON_PARSE_INVALID_OBJECT,
+		LEPT_JSON_PARSE_EXPECT_VALUE,
+		LEPT_JSON_PARSE_NOT_SINGULAR
 	};
 
 
@@ -22,8 +28,8 @@ namespace leptjson {
 	public:
 				
 		Boolean TryMatchChar(std::istream& input, char ch);
-
-		void Parse();
+		Boolean TryMatchString(std::istream& input, const String& src);
+		Boolean Parse();
 
 		LeptJsonParseRet Parse(std::istream& input, Value& value);
 
@@ -34,6 +40,12 @@ namespace leptjson {
 		LeptJsonParseRet ParseNumber(std::istream& input, Value& value);
 
 		LeptJsonParseRet ParseString(std::istream& input, Value& value);
+
+		LeptJsonParseRet ParseArray(std::istream& input, Value& value);
+
+		LeptJsonParseRet ParseObject(std::istream& input, Value& value);
+
+		LeptJsonParseRet ParseKey(std::istream& input, String& key);
 
 	};
 

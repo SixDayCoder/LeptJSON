@@ -27,6 +27,8 @@ namespace leptjson {
 			delete values.objectValue;
 			values.objectValue = 0;
 		}
+
+		memset(&values, 0, sizeof(Container));
 	}
 
 	void Value::Reset()
