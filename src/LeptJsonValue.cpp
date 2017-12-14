@@ -3,7 +3,7 @@
 #include <cstring>
 #include <cstdlib>
 
-namespace LeptJson {
+namespace leptjson {
 
 	Value::Value()
 	{

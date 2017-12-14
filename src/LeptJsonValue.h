@@ -6,10 +6,11 @@
 #include <map>
 #include <istream>
 
-namespace LeptJson {
+namespace leptjson {
 
 	//Ç°ÖÃÉùÃ÷
 	class Value;
+	class LeptJsonParser;
 
 	using Number = double;
 	using Boolean = bool;
@@ -34,12 +35,11 @@ namespace LeptJson {
 		LEPT_JSON_OBJECT
 	};
 
-	enum class LeptParseRet
+	class Value 
 	{
-		LEPT_PARSE_SUCCESS
-	};
 
-	class Value {
+	public:
+		friend class LeptJsonParser;
 
 	private:
 

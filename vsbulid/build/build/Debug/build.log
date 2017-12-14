@@ -1,7 +1,8 @@
-﻿  TestUnit.cpp
+﻿  LeptJsonParser.cpp
   Generating Code...
-  Skipping... (no relevant changes detected)
+c:\users\administrator\desktop\leptjson\leptjson\src\leptjsonparser.cpp(34): warning C4715: 'leptjson::LeptJsonParser::TryMatchChar': not all control paths return a value
+  Compiling...
   main.cpp
-  LeptJson.cpp
+  Generating Code...
   build.vcxproj -> C:\Users\Administrator\Desktop\LeptJson\LeptJSON\vsbulid\build\Debug\build.exe
   build.vcxproj -> C:\Users\Administrator\Desktop\LeptJson\LeptJSON\vsbulid\build\Debug\build.pdb (Full PDB)
