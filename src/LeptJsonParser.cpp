@@ -162,6 +162,7 @@ namespace leptjson {
 			}
 		}
 	}
+
 	LeptJsonParseRet LeptJsonParser::ParseLiteral(std::istream& input, const char* literal, Value& value)
 	{
 		if (!TryMatchString(input, literal)) {
