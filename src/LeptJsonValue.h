@@ -16,6 +16,9 @@ namespace leptjson {
 	using Number = double;
 	using Boolean = bool;
 	using String = std::string;
+	using Null = String;
+	using True = String;
+	using False = String;
 	using StringPtr = String*;
 	using ValuePtr = Value*;
 	using Array = std::vector<ValuePtr>;
@@ -137,6 +140,11 @@ namespace leptjson {
 		}
 		LeptJsonType GetType()const {
 			return type;
+		}
+
+		template<typename ElementType>
+		const ElementType& Get()const {
+			
 		}
 
 	};

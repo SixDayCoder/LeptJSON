@@ -111,5 +111,4 @@ namespace leptjson {
 			values.numberValue = 0;
 		}
 	}
-
 }

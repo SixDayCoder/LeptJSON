@@ -7,10 +7,21 @@
 namespace leptjson {
 
 	LeptJsonParser::LeptJsonParser(const char* json) : 
-					m_input(std::istringstream(String(json))),
+					m_input(String(json)),
 					m_value(0)
 	{
 
+	}
+
+	LeptJsonParser::LeptJsonParser(std::ifstream & file)
+	{
+		assert(file.is_open());
+
+		std::ostringstream out;
+		out << file.rdbuf();
+		m_input = std::istringstream(out.str());
+		file.close();
+		m_value = 0;
 	}
 
 	LeptJsonParser::~LeptJsonParser()

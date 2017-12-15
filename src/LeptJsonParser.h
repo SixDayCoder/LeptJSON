@@ -3,6 +3,7 @@
 
 #include "LeptJsonValue.h"
 #include <sstream>
+#include <fstream>
 
 namespace leptjson {
 
@@ -24,6 +25,7 @@ namespace leptjson {
 
 	public:
 		LeptJsonParser(const char* json);
+		LeptJsonParser(std::ifstream& json);
 		~LeptJsonParser();
 		std::istringstream m_input;
 		ValuePtr m_value;
