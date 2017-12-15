@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <istream>
+#include <cassert>
 
 namespace leptjson {
 
@@ -21,7 +22,6 @@ namespace leptjson {
 	using Object = std::map<std::string, ValuePtr>;
 	using ArrayPtr = Array*;
 	using ObjectPtr = Object*;
-
 
 	enum class LeptJsonType
 	{
@@ -58,41 +58,83 @@ namespace leptjson {
 		
 		Value();
 		~Value();
+		/*Value(const Value& other);
+		Value& operator=(const Value& other);
+		Boolean operator==(const Value& other);*/
 
 		void Reset();
 
 		Boolean IsNull()const {
 			return type == LeptJsonType::LEPT_JSON_NULL;
 		}
+		const String& GetNull() {
+			assert(IsNull());
+			return "null";
+		}
 
 		Boolean IsTrue()const {
 			return type == LeptJsonType::LEPT_JSON_TRUE;
+		}
+		const String& GetTrue()const{
+			assert(IsTrue());
+			return "true";
 		}
 
 		Boolean IsFalse()const {
 			return type == LeptJsonType::LEPT_JSON_FALSE;
 		}
+		const String& GetFalse()const {
+			assert(IsFalse());
+			return "false";
+		}
 
 		Boolean IsNumber()const {
 			return type == LeptJsonType::LEPT_JSON_NUMBER;
+		}
+		Number GetNumber()const {
+			assert(IsNumber());
+			return values.numberValue;
 		}
 
 		Boolean IsString()const {
 			return type == LeptJsonType::LEPT_JSON_STRING;
 		}
+		const String& GetString()const {
+			assert(IsString());
+			return *values.stringValue;
+		}
+		String& GetString() {
+			assert(IsString());
+			return *values.stringValue;
+		}
 
 		Boolean IsArray()const {
 			return type == LeptJsonType::LEPT_JSON_ARRAY;
+		}
+		const Array& GetArray()const {
+			assert(IsArray());
+			return *values.arrayValue;
+		}
+		Array& GetArray() {
+			assert(IsArray());
+			return *values.arrayValue;
 		}
 
 		Boolean IsObject()const {
 			return type == LeptJsonType::LEPT_JSON_OBJECT;
 		}
+		const Object& GetObject()const {
+			assert(IsObject());
+			return *values.objectValue;
+		}
+		Object& GetObject() {
+			assert(IsObject());
+			return *values.objectValue;
+		}
 
 		void SetType(LeptJsonType type) {
 			this->type = type;
 		}
-
 		LeptJsonType GetType()const {
 			return type;
 		}

@@ -24,8 +24,9 @@ namespace leptjson {
 
 	public:
 		LeptJsonParser(const char* json);
+		~LeptJsonParser();
 		std::istringstream m_input;
-	public:
+		ValuePtr m_value;
 				
 		Boolean TryMatchChar(std::istream& input, char ch);
 		Boolean TryMatchString(std::istream& input, const String& src);
@@ -49,6 +50,9 @@ namespace leptjson {
 
 		Boolean IsValidKeyChar(char ch);
 
+		const Value& JsonValue()const {
+			return *m_value;
+		}
 	};
 
 }
