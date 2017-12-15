@@ -188,13 +188,13 @@ namespace leptjson {
 
 	LeptJsonParseRet LeptJsonParser::ParseString(std::istream& input, Value& value)
 	{
-		//开头必须是"
-		if (!TryMatchChar(input, '\"')) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_STRING;
-		}
-
 		char ch = '\0';
 		char delimiter = '\"';
+
+		//开头必须是"
+		if (!TryMatchChar(input, delimiter)) {
+			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_STRING;
+		}
 
 		ch = input.peek();
 		if (ch == delimiter) {
@@ -275,7 +275,6 @@ namespace leptjson {
 		do {
 			Value* v = new Value();
 			ret = ParseValue(input, *v);
-
 			if (ret != LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS) {
 				delete v;
 				break;
@@ -292,13 +291,105 @@ namespace leptjson {
 
 	LeptJsonParseRet LeptJsonParser::ParseObject(std::istream & input, Value & value)
 	{
-		return LeptJsonParseRet();
+		if (!TryMatchChar(input, '{')) {
+			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_OBJECT;
+		}
+		char ch = '\0';
+		ch = input.peek();
+		if (TryMatchChar(input, '}')) {
+			value.SetType(LeptJsonType::LEPT_JSON_OBJECT);
+			//Empty Object
+			value.values.objectValue = new Object();
+
+			return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
+		}
+		LeptJsonParseRet ret;
+		do {
+			String key;
+			if (!ParseKey(input, key)) {
+				ret = LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_OBJECT;
+				break;
+			}
+
+			if (!TryMatchChar(input, ':')) {
+				ret = LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_OBJECT;
+				break;
+			}
+
+			printf("key is : %s\n", key.c_str());
+			Value *v = new Value();
+			ret = ParseValue(input, *v);
+
+			if (ret != LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS) {
+				delete v;
+				break;
+			}
+
+			value.values.objectValue->insert(std::make_pair(key, v));
+
+		} while (TryMatchChar(input, ','));
+
+		if (!TryMatchChar(input, '}')) {
+			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_OBJECT;
+		}
+		return ret;
 	}
 
-	LeptJsonParseRet LeptJsonParser::ParseKey(std::istream & input, String & key)
+	Boolean LeptJsonParser::ParseKey(std::istream & input, String & key)
 	{
-		return LeptJsonParseRet();
+		char ch = '\0';
+		char delimiter = '\"';
+
+		if (!TryMatchChar(input, delimiter)) {
+			return false;
+		}
+
+		//去掉开头部分的空格
+		input >> std::ws;
+
+		String buffer;
+
+		//key开头不能是数字,key的值只能是大小写字母,下划线,数字
+		while (input.good() && !input.eof()){
+			input.get(ch);
+			//成功解析字符串
+			if (ch == delimiter) {
+				//key不能是空的字符串
+				if (buffer.empty()) {
+					return false;
+				}
+				//去掉buffer首尾的空格,string.trim
+				buffer.erase(0, buffer.find_first_not_of(" "));
+				buffer.erase(buffer.find_last_not_of(' ') + 1);
+				//开头不可以是数字
+				if (isdigit(buffer[0]))
+					return false;
+				key = buffer;
+				return true;
+			}
+			else {
+
+				if (static_cast<unsigned char>(ch) < 0x20) {
+					return false;
+				}
+				else {
+					buffer.push_back(ch);
+					/*if (IsValidKeyChar(ch)) {
+						buffer.push_back(ch);
+					}
+					else{
+						return false;
+					}*/
+				}
+			}
+		}
+		//直到流结束都没碰到delimiter,说明解析失败
+		return false;
 	}
 
-	//return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_STRING;
+	Boolean LeptJsonParser::IsValidKeyChar(char ch)
+	{
+		return (ch == '_' || isdigit(ch) || isalpha(ch));
+	}
+
 }

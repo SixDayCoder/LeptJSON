@@ -45,7 +45,9 @@ namespace leptjson {
 
 		LeptJsonParseRet ParseObject(std::istream& input, Value& value);
 
-		LeptJsonParseRet ParseKey(std::istream& input, String& key);
+		Boolean ParseKey(std::istream& input, String& key);
+
+		Boolean IsValidKeyChar(char ch);
 
 	};
 

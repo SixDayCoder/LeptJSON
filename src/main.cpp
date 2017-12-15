@@ -49,6 +49,14 @@ int main()
 		printf("2\n");
 	}
 	
+	leptjson::LeptJsonParser parser2("{\"   title  \":\"windows\", \"   arr\":[123,[12, 23, 34],null,[],\"string\"],\"num  \":1234, \"  liter\":false, \"  obj\":{\"inter\" : 789} }");
+	//leptjson::LeptJsonParser parser2("{ \"title\":\"windows\", \"obj:\":{\"xxxx\":123} }");
+	if (parser2.Parse()) {
+		printf("1\n");
+	}
+	else {
+		printf("2\n");
+	}
 
 	//std::istringstream istr("  hello world");
 	//Test(istr);
