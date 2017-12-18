@@ -23,13 +23,19 @@ namespace leptjson {
 	class LeptJsonReader 
 	{
 
-	public:
-		LeptJsonReader(const char* json);
-		LeptJsonReader(std::ifstream& json);
-		~LeptJsonReader();
+	private:
 		std::istringstream m_input;
 		LeptJsonValuePtr m_value;
-				
+
+	public:
+		
+		LeptJsonReader() {}
+		~LeptJsonReader();
+
+		void LoadFromString(const char* json);
+		void LoadFromFile(const char* filepath);
+
+
 		Boolean TryMatchChar(std::istream& input, char ch);
 		Boolean TryMatchString(std::istream& input, const String& src);
 		Boolean Parse();

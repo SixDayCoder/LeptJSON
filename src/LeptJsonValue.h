@@ -19,8 +19,6 @@ namespace leptjson {
 	using String = std::string;
 	using StringPtr = String*;
 	using LeptJsonValuePtr = LeptJsonValue*;
-	using Object = std::map<std::string, LeptJsonValuePtr>;
-	using ObjectPtr = Object*;
 
 	enum class LeptJsonType
 	{
@@ -36,25 +34,63 @@ namespace leptjson {
 
 
 	class Array {
-		private:
-			std::vector<LeptJsonValuePtr> m_val;
-		public:
+	private:
+		std::vector<LeptJsonValuePtr> m_val;
+	public:
 
-			void PushValue(const LeptJsonValuePtr& val) {
+		void PushValue(const LeptJsonValuePtr& val) {
 				m_val.push_back(val);
 			}
 
-			const LeptJsonValuePtr& operator[](size_t index)const {
+		const LeptJsonValuePtr& operator[](size_t index)const {
 				return m_val[index];
 			}
 
-			LeptJsonValuePtr& operator[](size_t index){
+		LeptJsonValuePtr& operator[](size_t index){
 				return m_val[index];
 			}
 
-			friend std::ostream& operator<<(std::ostream& output, const Array& rhs);
+		friend std::ostream& operator<<(std::ostream& output, const Array& rhs);
 	};
 	using ArrayPtr = Array*;
+
+	class Object {
+	private:
+		std::map<std::string, LeptJsonValuePtr> m_map;
+
+	public:
+		using iterator = std::map<std::string, LeptJsonValuePtr>::iterator;
+		using const_iterator = std::map<std::string, LeptJsonValuePtr>::const_iterator;
+
+		const_iterator begin() const {
+			return m_map.begin();
+		}
+		const_iterator end() const{
+			return m_map.end();
+		}
+		const_iterator find(const String& key)const {
+			return m_map.find(key);
+		}
+
+		iterator begin() {
+			return m_map.begin();
+		}
+		iterator end() {
+			return m_map.end();
+		}
+		iterator find(const String& key) {
+			return m_map.find(key);
+		}
+
+		void InsertValue(const std::pair<std::string, LeptJsonValuePtr>& key_value);
+		
+		LeptJsonValuePtr& operator[](const String& key);
+
+		friend std::ostream& operator<<(std::ostream& output, const Object& rhs);
+
+	};
+	using ObjectPtr = Object*;
+
 
 	class LeptJsonValue 
 	{
@@ -94,7 +130,7 @@ namespace leptjson {
 		Boolean IsNull()const {
 			return type == LeptJsonType::LEPT_JSON_NULL;
 		}
-		const String& GetNull() {
+		const String& GetNull()const{
 			assert(IsNull());
 			return "null";
 		}

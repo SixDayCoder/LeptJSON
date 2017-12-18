@@ -9,29 +9,33 @@ namespace leptjson {
 	std::ostream & LeptJsonValue::FormatValue(std::ostream & output, const LeptJsonValue& v)
 	{
 		switch (v.GetType()) {
+
 		case LeptJsonType::LEPT_JSON_NULL:
-			output << "LeptJsonValue is : " << "null" << std::endl;
+			output << "null" << std::endl;
 			break;
 
 		case LeptJsonType::LEPT_JSON_TRUE:
-			output << "LeptJsonValue is : " << "true" << std::endl;
+			output << "true" << std::endl;
 			break;
 
 		case LeptJsonType::LEPT_JSON_FALSE:
-			output << "LeptJsonValue is : " << "false" << std::endl;
+			output << "false" << std::endl;
 			break;
 
 		case LeptJsonType::LEPT_JSON_NUMBER:
-			output << "LeptJsonValue is : " << v.GetNumber() << std::endl;
+			output << v.GetNumber() << std::endl;
 			break;
 
 		case LeptJsonType::LEPT_JSON_STRING:
-			output << "LeptJsonValue is : " << v.GetString() << std::endl;
+			output << v.GetString() << std::endl;
 			break;
 
 		case LeptJsonType::LEPT_JSON_ARRAY:
-			output << "LeptJsonValue is : " << v.GetArray() << std::endl;
+			output << std::endl << v.GetArray();
 			break;
+
+		case LeptJsonType::LEPT_JSON_OBJECT:
+			output << std::endl << v.GetObject();
 
 		default:break;
 		}
@@ -86,11 +90,27 @@ namespace leptjson {
 
 	std::ostream & operator<<(std::ostream & output, const Array & rhs)
 	{
-		for (size_t i = 0; i < rhs.m_val.size(); ++i) {
+		output << '[' << std::endl;
+		size_t cnt = rhs.m_val.size();
+		for (size_t i = 0; i < cnt ; ++i) {
 			const LeptJsonValuePtr& val = rhs.m_val[i];
-			LeptJsonType type = val->GetType();
 			LeptJsonValue::FormatValue(output, *val);
 		}
+		output << ']' << std::endl;
+		return output;
+	}
+
+
+	std::ostream & operator<<(std::ostream & output, const Object & rhs)
+	{
+		output << '{' << std::endl;
+		for (auto it = rhs.m_map.begin(); it != rhs.m_map.end(); it++) {
+			const String& key = it->first;
+			const LeptJsonValue&  val = *it->second;
+			output << key << " : ";
+			LeptJsonValue::FormatValue(output, val);
+		}
+		output << '}' << std::endl;
 		return output;
 	}
 
@@ -98,49 +118,22 @@ namespace leptjson {
 	{
 		if (v.isHaveKeys) {
 			const Object& json = v.GetObject();
-			for (auto it = json.begin(); it != json.end(); ++it) {
-				const String& key = it->first;
-				const LeptJsonValue&  val = *it->second;
-
-				output << "key is : " << key;
-
-				LeptJsonValue::FormatValue(output, val);
-
-				/*switch (type) {
-					case LeptJsonType::LEPT_JSON_NULL:
-						output << "LeptJsonValue is : " << "null" << std::endl;
-					break;
-
-					case LeptJsonType::LEPT_JSON_TRUE:
-						output << "LeptJsonValue is : " << "true" << std::endl;
-					break;
-
-					case LeptJsonType::LEPT_JSON_FALSE:
-						output << "LeptJsonValue is : " << "false" << std::endl;
-					break;
-
-					case LeptJsonType::LEPT_JSON_NUMBER:
-						output << "LeptJsonValue is : " << val.GetNumber() << std::endl;
-					break;
-
-					case LeptJsonType::LEPT_JSON_STRING:
-						output << "LeptJsonValue is : " << val.GetString() << std::endl;
-					break;
-
-					case LeptJsonType::LEPT_JSON_ARRAY:
-						output << "LeptJsonValue is : " << val.GetArray() << std::endl;
-					break;
-
-					default:break;
-				}*/
-
-			}
+			output << json << std::endl;
 		}
 		//只有一个LeptJsonValue不含键
 		else {
 			LeptJsonValue::FormatValue(output, v);
 		}
-
 		return output;
+	}
+
+	void Object::InsertValue(const std::pair<std::string, LeptJsonValuePtr>& key_value)
+	{
+		m_map.insert(key_value);
+	}
+
+	LeptJsonValuePtr & Object::operator[](const String & key)
+	{
+		return m_map[key];
 	}
 }

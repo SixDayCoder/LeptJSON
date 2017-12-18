@@ -6,22 +6,28 @@
 
 namespace leptjson {
 
-	LeptJsonReader::LeptJsonReader(const char* json) : 
-					m_input(String(json)),
-					m_value(0)
+
+	void LeptJsonReader::LoadFromString(const char * json)
 	{
+		m_input = std::istringstream(json);
+		if (m_value != 0) {
+			m_value->Reset();
+		}
 
 	}
 
-	LeptJsonReader::LeptJsonReader(std::ifstream & file)
+	void LeptJsonReader::LoadFromFile(const char * filepath)
 	{
+		std::ifstream file(filepath);
 		assert(file.is_open());
 
 		std::ostringstream out;
 		out << file.rdbuf();
 		m_input = std::istringstream(out.str());
 		file.close();
-		m_value = 0;
+		if (m_value != 0) {
+			m_value->Reset();
+		}
 	}
 
 	LeptJsonReader::~LeptJsonReader()
@@ -224,7 +230,6 @@ namespace leptjson {
 			input.get(ch);
 			value.SetType(LeptJsonType::LEPT_JSON_STRING);
 			value.values.stringValue= new String("\"\"");
-			//printf("parse string : %s\n", LeptJsonValue.LeptJsonValues.stringLeptJsonValue->c_str());
 		}
 		else {
 
@@ -301,8 +306,6 @@ namespace leptjson {
 				delete v;
 				break;
 			}
-			//LeptJsonValue.LeptJsonValues.arrayLeptJsonValue->push_back(v);
-			//LeptJsonValue.LeptJsonValues.arrayLeptJsonValue->PushLeptJsonValue(v);
 			value.values.arrayValue->PushValue(v);
 		} while (TryMatchChar(input, ','));
 
@@ -322,8 +325,6 @@ namespace leptjson {
 		ch = input.peek();
 		if (TryMatchChar(input, '}')) {
 			value.SetType(LeptJsonType::LEPT_JSON_OBJECT);
-			//Empty Object
-			//printf("parse empty object\n");
 			value.values.objectValue = new Object();
 			return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
 		}
@@ -340,7 +341,6 @@ namespace leptjson {
 				break;
 			}
 
-			//printf("key is : %s\n", key.c_str());
 			LeptJsonValue *v = new LeptJsonValue();
 			ret = ParseLeptJsonValue(input, *v);
 
@@ -349,7 +349,7 @@ namespace leptjson {
 				break;
 			}
 			value.isHaveKeys = true;
-			value.values.objectValue->insert(std::make_pair(key, v));
+			value.values.objectValue->InsertValue(std::make_pair(key, v));
 
 		} while (TryMatchChar(input, ','));
 
