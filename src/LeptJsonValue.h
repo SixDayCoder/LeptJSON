@@ -10,20 +10,16 @@
 namespace leptjson {
 
 	//Ç°ÖÃÉùÃ÷
-	class Value;
-	class LeptJsonParser;
+	class LeptJsonReader;
+	class LeptJsonValue;
+	class Array;
 
 	using Number = double;
 	using Boolean = bool;
 	using String = std::string;
-	using Null = String;
-	using True = String;
-	using False = String;
 	using StringPtr = String*;
-	using ValuePtr = Value*;
-	using Array = std::vector<ValuePtr>;
-	using Object = std::map<std::string, ValuePtr>;
-	using ArrayPtr = Array*;
+	using LeptJsonValuePtr = LeptJsonValue*;
+	using Object = std::map<std::string, LeptJsonValuePtr>;
 	using ObjectPtr = Object*;
 
 	enum class LeptJsonType
@@ -38,12 +34,37 @@ namespace leptjson {
 		LEPT_JSON_OBJECT
 	};
 
-	class Value 
+
+	class Array {
+		private:
+			std::vector<LeptJsonValuePtr> m_val;
+		public:
+
+			void PushValue(const LeptJsonValuePtr& val) {
+				m_val.push_back(val);
+			}
+
+			const LeptJsonValuePtr& operator[](size_t index)const {
+				return m_val[index];
+			}
+
+			LeptJsonValuePtr& operator[](size_t index){
+				return m_val[index];
+			}
+
+			friend std::ostream& operator<<(std::ostream& output, const Array& rhs);
+	};
+	using ArrayPtr = Array*;
+
+	class LeptJsonValue 
 	{
 
 	public:
-		friend class LeptJsonParser;
+		static std::ostream& FormatValue(std::ostream& output, const LeptJsonValue& v);
 
+	public:
+		friend class LeptJsonReader;
+		friend std::ostream& operator<<(std::ostream& output, const LeptJsonValue& v);
 	private:
 
 		LeptJsonType type;
@@ -57,15 +78,18 @@ namespace leptjson {
 
 		}values;
 
+		Boolean isHaveKeys;
+
 	public:
 		
-		Value();
-		~Value();
-		/*Value(const Value& other);
-		Value& operator=(const Value& other);
-		Boolean operator==(const Value& other);*/
+		LeptJsonValue();
+		~LeptJsonValue();
 
 		void Reset();
+		
+		Boolean IsHaveKeys()const {
+			return isHaveKeys == true;
+		}
 
 		Boolean IsNull()const {
 			return type == LeptJsonType::LEPT_JSON_NULL;
@@ -142,10 +166,6 @@ namespace leptjson {
 			return type;
 		}
 
-		template<typename ElementType>
-		const ElementType& Get()const {
-			
-		}
 
 	};
 }
