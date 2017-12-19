@@ -1,4 +1,5 @@
 #include "LeptJsonParser.h"
+#include "UnitTest.h"
 #include <iostream>
 #include <fstream>
 
@@ -6,6 +7,7 @@ using namespace leptjson;
 
 int main() 
 {	
+	/*
 	const char* text = "{\"   title  \":\"windows\", \"empty\":[], \"   arr\":[123,[12, 23, 34],null,[] , {}, \"string\"],\"num  \":1234, \"  liter\":false, \"  obj\":{\"inter\" : 789} }";
 	LeptJsonReader reader;
 	reader.LoadFromString(text);
@@ -28,5 +30,9 @@ int main()
 		}
 
 	}
+	*/
+
+	UnitTest::Instance().TestAll();
+
 	return 0;
 }

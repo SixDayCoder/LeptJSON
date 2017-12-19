@@ -172,7 +172,7 @@ namespace leptjson {
 		Boolean IsNull()const {
 			return type == LeptJsonType::LEPT_JSON_NULL;
 		}
-		const String& GetNull()const{
+		String GetNull()const{
 			assert(IsNull());
 			return "null";
 		}
@@ -180,7 +180,7 @@ namespace leptjson {
 		Boolean IsTrue()const {
 			return type == LeptJsonType::LEPT_JSON_TRUE;
 		}
-		const String& GetTrue()const{
+		String GetTrue()const{
 			assert(IsTrue());
 			return "true";
 		}
@@ -188,7 +188,7 @@ namespace leptjson {
 		Boolean IsFalse()const {
 			return type == LeptJsonType::LEPT_JSON_FALSE;
 		}
-		const String& GetFalse()const {
+		String GetFalse()const {
 			assert(IsFalse());
 			return "false";
 		}

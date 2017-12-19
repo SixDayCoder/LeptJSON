@@ -127,7 +127,7 @@ namespace leptjson {
 		input >> std::ws;
 		//空字符串
 		if (input.eof()) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_EXPECT_LeptJsonValue;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_EXPECT_VALUE;
 		}
 		else {
 			char ch = input.peek();
@@ -224,7 +224,8 @@ namespace leptjson {
 			//如果是空字符串""
 			input.get(ch);
 			value.SetType(LeptJsonType::LEPT_JSON_STRING);
-			value.values.stringValue= new String("\"\"");
+			value.values.stringValue= new String("");
+			return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
 		}
 		else {
 
@@ -238,7 +239,6 @@ namespace leptjson {
 					case '\"': 
 						value.SetType(LeptJsonType::LEPT_JSON_STRING);
 						value.values.stringValue = new String(buffer);
-						//printf("parse string : %s\n", LeptJsonValue.LeptJsonValues.stringLeptJsonValue->c_str());
 						return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
 					break;
 
@@ -246,15 +246,14 @@ namespace leptjson {
 					case '\\': 
 						input.get(ch);
 						switch (ch){
-							case '\\':
-							case '/':
-								buffer.push_back(ch);
-							break;
-							case 'b':buffer.push_back('\b'); break;
-							case 'f':buffer.push_back('\f'); break;
-							case 'n':buffer.push_back('\n'); break;
-							case 'r':buffer.push_back('\r'); break;
-							case 't':buffer.push_back('\t'); break;
+							case '\"':buffer.push_back('\"'); break;
+							case '\\':buffer.push_back('\\'); break;
+							case '/': buffer.push_back('/');  break;
+							case 'b': buffer.push_back('\b'); break;
+							case 'f': buffer.push_back('\f'); break;
+							case 'n': buffer.push_back('\n'); break;
+							case 'r': buffer.push_back('\r'); break;
+							case 't': buffer.push_back('\t'); break;
 							//TODO-Unicode
 							//否则是不合法的转义字符序列
 							default: return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_STRING; break;
@@ -368,20 +367,11 @@ namespace leptjson {
 			input.get(ch);
 			//成功解析字符串
 			if (ch == delimiter) {
-
-				//key不能是空的字符串
-				if (buffer.empty()) {
-					return false;
-				}
 				//去掉buffer首尾的空格,string.trim
 				buffer.erase(0, buffer.find_first_not_of(" "));
 				buffer.erase(buffer.find_last_not_of(' ') + 1);
-				//开头不可以是数字
-				if (isdigit(buffer[0]))
+				if (buffer.empty()) {
 					return false;
-				for (size_t i = 0; i < buffer.length(); ++i) {
-					if (!IsValidKeyChar(buffer[i]))
-						return false;
 				}
 				//正确解析
 				key = buffer;
@@ -399,11 +389,6 @@ namespace leptjson {
 		}
 		//直到流结束都没碰到delimiter,说明解析失败
 		return false;
-	}
-
-	Boolean LeptJsonReader::IsValidKeyChar(char ch)
-	{
-		return (ch == '_' || isdigit(ch) || isalpha(ch));
 	}
 
 }

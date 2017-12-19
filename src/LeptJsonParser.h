@@ -15,7 +15,7 @@ namespace leptjson {
 		LEPT_JSON_PARSE_INVALID_STRING,
 		LEPT_JSON_PARSE_INVALID_ARRAY,
 		LEPT_JSON_PARSE_INVALID_OBJECT,
-		LEPT_JSON_PARSE_EXPECT_LeptJsonValue,
+		LEPT_JSON_PARSE_EXPECT_VALUE,
 		LEPT_JSON_PARSE_NOT_SINGULAR
 	};
 
@@ -58,8 +58,6 @@ namespace leptjson {
 		Boolean TryMatchChar(std::istream& input, char ch);
 
 		Boolean TryMatchString(std::istream& input, const String& src);
-
-		Boolean IsValidKeyChar(char ch);
 
 		LeptJsonParseRet Parse(std::istream& input, LeptJsonValue& LeptJsonValue);
 
