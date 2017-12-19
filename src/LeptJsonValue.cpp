@@ -6,43 +6,6 @@
 
 namespace leptjson {
 
-	std::ostream & LeptJsonValue::FormatValue(std::ostream & output, const LeptJsonValue& v)
-	{
-		switch (v.GetType()) {
-
-		case LeptJsonType::LEPT_JSON_NULL:
-			output << "null" << std::endl;
-			break;
-
-		case LeptJsonType::LEPT_JSON_TRUE:
-			output << "true" << std::endl;
-			break;
-
-		case LeptJsonType::LEPT_JSON_FALSE:
-			output << "false" << std::endl;
-			break;
-
-		case LeptJsonType::LEPT_JSON_NUMBER:
-			output << v.GetNumber() << std::endl;
-			break;
-
-		case LeptJsonType::LEPT_JSON_STRING:
-			output << v.GetString() << std::endl;
-			break;
-
-		case LeptJsonType::LEPT_JSON_ARRAY:
-			output << std::endl << v.GetArray();
-			break;
-
-		case LeptJsonType::LEPT_JSON_OBJECT:
-			output << std::endl << v.GetObject();
-
-		default:break;
-		}
-
-		return output;
-	}
-
 	LeptJsonValue::LeptJsonValue()
 	{
 		type = LeptJsonType::LEPT_JSON_EMPTY;
@@ -88,29 +51,84 @@ namespace leptjson {
 		}
 	}
 
-	std::ostream & operator<<(std::ostream & output, const Array & rhs)
+	std::ostream & LeptJsonValue::FormatValue(std::ostream & output, const LeptJsonValue& v)
 	{
-		output << '[' << std::endl;
-		size_t cnt = rhs.m_val.size();
-		for (size_t i = 0; i < cnt ; ++i) {
-			const LeptJsonValuePtr& val = rhs.m_val[i];
-			LeptJsonValue::FormatValue(output, *val);
+		switch (v.GetType()) {
+
+		case LeptJsonType::LEPT_JSON_NULL:
+			output << "null";
+			break;
+
+		case LeptJsonType::LEPT_JSON_TRUE:
+			output << "true";
+			break;
+
+		case LeptJsonType::LEPT_JSON_FALSE:
+			output << "false";
+			break;
+
+		case LeptJsonType::LEPT_JSON_NUMBER:
+			output << v.GetNumber();
+			break;
+
+		case LeptJsonType::LEPT_JSON_STRING:
+			output << v.GetString();
+			break;
+
+		case LeptJsonType::LEPT_JSON_ARRAY:
+			output << v.GetArray();
+			break;
+
+		case LeptJsonType::LEPT_JSON_OBJECT:
+			output << v.GetObject();
+			break;
+
+		default:break;
 		}
-		output << ']' << std::endl;
+
 		return output;
 	}
 
+	std::ostream & operator<<(std::ostream & output, const Array & rhs)
+	{
+		if (rhs.empty()) {
+			output << "[]";
+		}
+		else {
+			output << '[';
+			size_t cnt = rhs.m_val.size();
+			for (size_t i = 0; i < cnt; ++i) {
+				const LeptJsonValuePtr& val = rhs.m_val[i];
+				LeptJsonValue::FormatValue(output, *val);
+				if(i != cnt - 1)
+					output << ",";
+			}
+			output << ']';
+		}
+		return output;
+	}
 
 	std::ostream & operator<<(std::ostream & output, const Object & rhs)
 	{
-		output << '{' << std::endl;
-		for (auto it = rhs.m_map.begin(); it != rhs.m_map.end(); it++) {
-			const String& key = it->first;
-			const LeptJsonValue&  val = *it->second;
-			output << key << " : ";
-			LeptJsonValue::FormatValue(output, val);
+		if (rhs.empty()) {
+			output << "{}";
 		}
-		output << '}' << std::endl;
+		else
+		{
+			output << '{';
+			//不可end直接-1因为是随机访问迭代器而非顺序
+			auto delimater = rhs.m_map.end();
+			delimater--;
+			for (auto it = rhs.m_map.begin(); it != rhs.m_map.end(); it++) {
+				const String& key = it->first;
+				const LeptJsonValue&  val = *it->second;
+				output << key << " : ";
+				LeptJsonValue::FormatValue(output, val);
+				if(it != delimater)
+					output << std::endl;
+			}
+			output << '}';
+		}
 		return output;
 	}
 
@@ -127,13 +145,4 @@ namespace leptjson {
 		return output;
 	}
 
-	void Object::InsertValue(const std::pair<std::string, LeptJsonValuePtr>& key_value)
-	{
-		m_map.insert(key_value);
-	}
-
-	LeptJsonValuePtr & Object::operator[](const String & key)
-	{
-		return m_map[key];
-	}
 }

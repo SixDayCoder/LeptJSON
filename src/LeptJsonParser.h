@@ -24,8 +24,10 @@ namespace leptjson {
 	{
 
 	private:
+
 		std::istringstream m_input;
 		LeptJsonValuePtr m_value;
+		LeptJsonParseRet m_state;
 
 	public:
 		
@@ -35,10 +37,29 @@ namespace leptjson {
 		void LoadFromString(const char* json);
 		void LoadFromFile(const char* filepath);
 
+		void Parse();
+
+		const LeptJsonValue& ParseResult()const 
+		{
+			return *m_value;
+		}
+
+		LeptJsonValue& ParseResult()
+		{
+			return *m_value;
+		}
+
+		const LeptJsonParseRet ParseState()const {
+			return m_state;
+		}
+		
+	private:
 
 		Boolean TryMatchChar(std::istream& input, char ch);
+
 		Boolean TryMatchString(std::istream& input, const String& src);
-		Boolean Parse();
+
+		Boolean IsValidKeyChar(char ch);
 
 		LeptJsonParseRet Parse(std::istream& input, LeptJsonValue& LeptJsonValue);
 
@@ -55,12 +76,6 @@ namespace leptjson {
 		LeptJsonParseRet ParseObject(std::istream& input, LeptJsonValue& LeptJsonValue);
 
 		Boolean ParseKey(std::istream& input, String& key);
-
-		Boolean IsValidKeyChar(char ch);
-
-		const LeptJsonValue& ParseResult()const {
-			return *m_value;
-		}
 
 	};
 

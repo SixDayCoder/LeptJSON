@@ -9,7 +9,9 @@
 
 namespace leptjson {
 
-	//前置声明
+	/************************************************************************/
+	/* 前置声明和类型重定义                                                  */
+	/************************************************************************/
 	class LeptJsonReader;
 	class LeptJsonValue;
 	class Array;
@@ -20,6 +22,9 @@ namespace leptjson {
 	using StringPtr = String*;
 	using LeptJsonValuePtr = LeptJsonValue*;
 
+	/************************************************************************/
+	/* 预定义enum                                                            */
+	/************************************************************************/
 	enum class LeptJsonType
 	{
 		LEPT_JSON_EMPTY,
@@ -32,13 +37,27 @@ namespace leptjson {
 		LEPT_JSON_OBJECT
 	};
 
-
+	/************************************************************************/
+	/* 封装Array                                                            */
+	/************************************************************************/
 	class Array {
 	private:
 		std::vector<LeptJsonValuePtr> m_val;
 	public:
 
-		void PushValue(const LeptJsonValuePtr& val) {
+		Array() {
+			m_val.clear();
+		}
+
+		size_t size()const {
+			return m_val.size();
+		}
+
+		Boolean empty()const {
+			return m_val.empty();
+		}
+
+		void push_back(const LeptJsonValuePtr& val) {
 				m_val.push_back(val);
 			}
 
@@ -54,13 +73,20 @@ namespace leptjson {
 	};
 	using ArrayPtr = Array*;
 
+	/************************************************************************/
+	/* 封装Object                                                           */
+	/************************************************************************/
 	class Object {
 	private:
-		std::map<std::string, LeptJsonValuePtr> m_map;
-
+		std::map<String, LeptJsonValuePtr> m_map;
 	public:
+
 		using iterator = std::map<std::string, LeptJsonValuePtr>::iterator;
 		using const_iterator = std::map<std::string, LeptJsonValuePtr>::const_iterator;
+
+		Object() {
+			m_map.clear();
+		}
 
 		const_iterator begin() const {
 			return m_map.begin();
@@ -82,16 +108,32 @@ namespace leptjson {
 			return m_map.find(key);
 		}
 
-		void InsertValue(const std::pair<std::string, LeptJsonValuePtr>& key_value);
+		Boolean empty()const {
+			return m_map.empty();
+		}
+
+		size_t size()const {
+			return m_map.size();
+		}
+
+		void insert(const std::pair<std::string, LeptJsonValuePtr>& key_value)
+		{
+			m_map.insert(key_value);
+		}
 		
-		LeptJsonValuePtr& operator[](const String& key);
+		const LeptJsonValuePtr& operator[](const String& key)
+		{
+			return m_map[key];
+		}
 
 		friend std::ostream& operator<<(std::ostream& output, const Object& rhs);
 
 	};
 	using ObjectPtr = Object*;
 
-
+	/************************************************************************/
+	/* 抽象,JsonValue                                                       */
+	/************************************************************************/
 	class LeptJsonValue 
 	{
 

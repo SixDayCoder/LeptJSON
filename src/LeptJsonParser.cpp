@@ -94,16 +94,15 @@ namespace leptjson {
 		return bSuccess;
 	}
 
-	Boolean LeptJsonReader::Parse()
+	void LeptJsonReader::Parse()
 	{
 		if (m_value == 0) {
 			m_value = new LeptJsonValue();
 		}
-		if (LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS != Parse(m_input, *m_value) ) {
+		else {
 			m_value->Reset();
-			return false;
 		}
-		return true;
+		m_state = Parse(m_input, *m_value);
 	}
 
 	LeptJsonParseRet LeptJsonReader::Parse(std::istream & input, LeptJsonValue & value)
@@ -175,17 +174,14 @@ namespace leptjson {
 			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_LITERAL;
 		}
 		else {
-
 			if (literal == "null") {
-				//printf("parse null\n");
 				value.SetType(LeptJsonType::LEPT_JSON_NULL);
 			}
 			else if (literal == "false") {
-				//printf("parse false\n");
+
 				value.SetType(LeptJsonType::LEPT_JSON_FALSE);
 			}
 			else if (literal == "true") {
-				//printf("parse true\n");
 				value.SetType(LeptJsonType::LEPT_JSON_TRUE);
 			}
 			else {
@@ -209,7 +205,6 @@ namespace leptjson {
 		else {
 			value.SetType(LeptJsonType::LEPT_JSON_NUMBER);
 			value.values.numberValue = number;
-			//printf("parse number : %.17g\n", LeptJsonValue.LeptJsonValues.numberLeptJsonValue);
 			return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
 		}
 	}
@@ -291,9 +286,7 @@ namespace leptjson {
 		ch = input.peek();
 		if (TryMatchChar(input, ']')) {
 			value.SetType(LeptJsonType::LEPT_JSON_ARRAY);
-			//Empty Array
 			value.values.arrayValue = new Array();
-			//printf("parse empty array\n");
 			return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
 		}
 
@@ -306,7 +299,7 @@ namespace leptjson {
 				delete v;
 				break;
 			}
-			value.values.arrayValue->PushValue(v);
+			value.values.arrayValue->push_back(v);
 		} while (TryMatchChar(input, ','));
 
 		if (!TryMatchChar(input, ']')) {
@@ -349,7 +342,7 @@ namespace leptjson {
 				break;
 			}
 			value.isHaveKeys = true;
-			value.values.objectValue->InsertValue(std::make_pair(key, v));
+			value.values.objectValue->insert(std::make_pair(key, v));
 
 		} while (TryMatchChar(input, ','));
 
