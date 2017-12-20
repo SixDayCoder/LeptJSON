@@ -2,6 +2,7 @@
 #include "UnitTest.h"
 #include <iostream>
 #include <fstream>
+#include <queue>
 
 using namespace leptjson;
 
@@ -32,7 +33,38 @@ int main()
 	}
 	*/
 
-	UnitTest::Instance().TestAll();
+	//UnitTest::Instance().TestAll();
+	std::istringstream input("nul");
+	std::queue<char> buffer;
+	while (!buffer.empty())
+		buffer.pop();
+
+	char ch;
+	std::string src("null");
+	size_t len = src.length();
+	size_t cnt = 0;
+	bool bSuccess = true;
+
+	while (input && !input.eof() && len > 0) {
+		input.get(ch);
+		std::cout << ch;
+		if (src[cnt] == ch) {
+			buffer.push(ch);
+			cnt++;
+			len--;
+		}
+		else {
+			input.putback(ch);
+			bSuccess = false;
+			break;
+		}
+	}
+	std::cout << std::endl;
+	while (!buffer.empty()) {
+		std::cout << buffer.front();
+		buffer.pop();
+	}
+	std::cout << std::endl;
 
 	return 0;
 }

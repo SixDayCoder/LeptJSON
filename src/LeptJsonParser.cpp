@@ -114,7 +114,8 @@ namespace leptjson {
 			if (!input.eof()) {
 				input >> std::ws;
 				if (!input.eof()) {
-					return LeptJsonParseRet::LEPT_JSON_PARSE_NOT_SINGULAR;
+					value.SetType(LeptJsonType::LEPT_JSON_EMPTY);
+					return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 				}
 			}
 		}
@@ -127,7 +128,7 @@ namespace leptjson {
 		input >> std::ws;
 		//空字符串
 		if (input.eof()) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_EXPECT_VALUE;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 		}
 		else {
 			char ch = input.peek();
@@ -163,7 +164,12 @@ namespace leptjson {
 				break;
 
 				case '\"': return ParseString(input, value); break;
-				default: return ParseNumber(input, value); break;
+				default: {
+					if (isalpha(ch)) 
+						return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+					else
+						return ParseNumber(input, value); break;
+				}
 			}
 		}
 	}
@@ -171,7 +177,7 @@ namespace leptjson {
 	LeptJsonParseRet LeptJsonReader::ParseLiteral(std::istream& input, const char* literal, LeptJsonValue& value)
 	{
 		if (!TryMatchString(input, literal)) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_LITERAL;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 		}
 		else {
 			if (literal == "null") {
@@ -187,8 +193,8 @@ namespace leptjson {
 			else {
 
 			}
+			return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
 		}
-		return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
 	}
 
 	LeptJsonParseRet LeptJsonReader::ParseNumber(std::istream& input, LeptJsonValue& value)
@@ -200,7 +206,7 @@ namespace leptjson {
 			//fail之后记得clear
 			input.clear();
 			input.seekg(rollback);
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_NUMBER;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 		}
 		else {
 			value.SetType(LeptJsonType::LEPT_JSON_NUMBER);
@@ -216,7 +222,7 @@ namespace leptjson {
 
 		//开头必须是"
 		if (!TryMatchChar(input, delimiter)) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_STRING;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 		}
 
 		ch = input.peek();
@@ -256,14 +262,14 @@ namespace leptjson {
 							case 't': buffer.push_back('\t'); break;
 							//TODO-Unicode
 							//否则是不合法的转义字符序列
-							default: return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_STRING; break;
+							default: return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE; break;
 						}
 					break;
 
 					//默认情况添加字符到buffer
 					default: 
 						if (static_cast<unsigned char>(ch) < 0x20) {
-							return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_STRING;
+							return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 						}
 						else{
 							buffer.push_back(ch);
@@ -272,13 +278,13 @@ namespace leptjson {
 				}
 			}
 		}
-		return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_STRING;
+		return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 	}
 
 	LeptJsonParseRet LeptJsonReader::ParseArray(std::istream & input, LeptJsonValue & value)
 	{
 		if (!TryMatchChar(input, '[')) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_ARRAY;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 		}
 
 		char ch = '\0';
@@ -302,7 +308,7 @@ namespace leptjson {
 		} while (TryMatchChar(input, ','));
 
 		if (!TryMatchChar(input, ']')) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_ARRAY;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 		}
 
 		return ret;
@@ -311,7 +317,7 @@ namespace leptjson {
 	LeptJsonParseRet LeptJsonReader::ParseObject(std::istream & input, LeptJsonValue & value)
 	{
 		if (!TryMatchChar(input, '{')) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_OBJECT;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 		}
 		char ch = '\0';
 		ch = input.peek();
@@ -324,12 +330,12 @@ namespace leptjson {
 		do {
 			String key;
 			if (!ParseKey(input, key)) {
-				ret = LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_OBJECT;
+				ret = LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 				break;
 			}
 
 			if (!TryMatchChar(input, ':')) {
-				ret = LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_OBJECT;
+				ret = LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 				break;
 			}
 
@@ -346,7 +352,7 @@ namespace leptjson {
 		} while (TryMatchChar(input, ','));
 
 		if (!TryMatchChar(input, '}')) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_OBJECT;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
 		}
 		return ret;
 	}

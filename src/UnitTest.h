@@ -53,7 +53,7 @@ namespace leptjson {
 
 		void TestInvalid();
 
-		void TestInvalidCase();
+		void TestInvalidCase(const char* json);
 
 		template<typename ElementType>
 		void ExpectEqActual(const ElementType& expect, const ElementType& actual)

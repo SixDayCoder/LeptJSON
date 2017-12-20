@@ -259,10 +259,77 @@ namespace leptjson {
 
 	void UnitTest::TestInvalid()
 	{
+		/************************************************************************/
+		/* 非法字面值                                                            */
+		/************************************************************************/
+		//TestInvalidCase("nul");  TOFIX
+		TestInvalidCase("nu");
+		TestInvalidCase("fals");
+		TestInvalidCase("fal se");
+		TestInvalidCase("  trxe ");
+		TestInvalidCase("tru");
+		TestInvalidCase("hello");
+		TestInvalidCase("?");
+		TestInvalidCase("");
+
+		/************************************************************************/
+		/* 非法数字                                                              */
+		/************************************************************************/
+		TestInvalidCase("0.1 * 20");
+		TestInvalidCase("+1 + -2");
+		TestInvalidCase(".123xx"); /* at least one digit before '.' */
+		TestInvalidCase("1.xx");   /* at least one digit after '.' */
+		TestInvalidCase("inf");
+		TestInvalidCase("1e309");
+
+		/************************************************************************/
+		/* 非法字符串                                                            */
+		/************************************************************************/
+		TestInvalidCase("\"\\v\"");
+		TestInvalidCase("\"\\'\"");
+		TestInvalidCase("\"\\0\"");
+		TestInvalidCase("\"\\x12\"");
+		TestInvalidCase("\"\x01\"");
+		TestInvalidCase("\"\x1F\"");
+
+		/************************************************************************/
+		/* 非法数组                                                              */
+		/************************************************************************/
+		TestInvalidCase("[1");
+		TestInvalidCase("[1}");
+		TestInvalidCase("[1 2");
+		TestInvalidCase("[[]");
+		TestInvalidCase("[1,]");
+		TestInvalidCase("[\"a\", nul]");
+		TestInvalidCase("[\"a\" : nul]");
+
+		/************************************************************************/
+		/* 非法对象                                                              */
+		/************************************************************************/
+		TestInvalidCase("{:1,");
+		TestInvalidCase("{1:1,");
+		TestInvalidCase("{true:1,");
+		TestInvalidCase("{false:1,");
+		TestInvalidCase("{null:1,");
+		TestInvalidCase("{[]:1,");
+		TestInvalidCase("{{}:1,");
+		TestInvalidCase("{\"a\":1,");
+		TestInvalidCase("{\"a\"}");
+		TestInvalidCase("{\"a\",\"b\"}");
+		TestInvalidCase("{\"a\":1");
+		TestInvalidCase("{\"a\":1]");
+		TestInvalidCase("{\"a\":1 \"b\"");
+		TestInvalidCase("{\"a\":{}");
 	}
 
-	void UnitTest::TestInvalidCase()
+	void UnitTest::TestInvalidCase(const char* json)
 	{
+		LeptJsonReader reader;
+		reader.LoadFromString(json);
+		reader.Parse();
+		ExpectEqActual(LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE, reader.ParseState());
+		LeptJsonValue& value = reader.ParseResult();
+		ExpectEqActual(LeptJsonType::LEPT_JSON_EMPTY, value.GetType());
 	}
 
 }

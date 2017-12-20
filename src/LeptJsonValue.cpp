@@ -56,15 +56,15 @@ namespace leptjson {
 		switch (v.GetType()) {
 
 		case LeptJsonType::LEPT_JSON_NULL:
-			output << "null";
+			output << v.GetNull();
 			break;
 
 		case LeptJsonType::LEPT_JSON_TRUE:
-			output << "true";
+			output << v.GetTrue();
 			break;
 
 		case LeptJsonType::LEPT_JSON_FALSE:
-			output << "false";
+			output << v.GetFalse();
 			break;
 
 		case LeptJsonType::LEPT_JSON_NUMBER:
