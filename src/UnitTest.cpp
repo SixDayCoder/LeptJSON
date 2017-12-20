@@ -6,7 +6,7 @@ namespace leptjson {
 	size_t UnitTest::sPassTestCount = 0;
 
 
-	void UnitTest::TestAll()
+	void UnitTest::TestParseAll()
 	{
 		TestLiteral();
 
@@ -262,7 +262,7 @@ namespace leptjson {
 		/************************************************************************/
 		/* 非法字面值                                                            */
 		/************************************************************************/
-		//TestInvalidCase("nul");  TOFIX
+		TestInvalidCase("nul");
 		TestInvalidCase("nu");
 		TestInvalidCase("fals");
 		TestInvalidCase("fal se");

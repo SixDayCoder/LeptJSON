@@ -29,7 +29,7 @@ namespace leptjson {
 		static size_t sTotalTestCount;
 		static size_t sPassTestCount;
 	public:
-		void TestAll();
+		void TestParseAll();
 		
 		void TestLiteral();
 

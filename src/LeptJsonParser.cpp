@@ -65,13 +65,20 @@ namespace leptjson {
 		while (!buffer.empty())
 			buffer.pop();
 
-		char ch;
+		//char ch;
 		size_t len = src.length();
 		size_t cnt = 0;
 		bool bSuccess = true;
+		char ch;
+		while (input.good() && len > 0){
 
-		while (input.good() && !input.eof() && len > 0){
 			input.get(ch);
+
+			if (input.eof()) {
+				bSuccess = false;
+				break;
+			}
+
 			if (src[cnt] == ch) {
 				buffer.push(ch);
 				cnt++;

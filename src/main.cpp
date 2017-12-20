@@ -8,7 +8,16 @@ using namespace leptjson;
 
 int main() 
 {	
-	/*
+	/************************************************************************/
+	/*parse的单元测试                                                        */
+	/************************************************************************/
+	std::cout << std::endl;
+	UnitTest::Instance().TestParseAll();
+	std::cout << std::endl;
+	
+	/************************************************************************/
+	/* 代码                                                                 */
+	/************************************************************************/
 	const char* text = "{\"   title  \":\"windows\", \"empty\":[], \"   arr\":[123,[12, 23, 34],null,[] , {}, \"string\"],\"num  \":1234, \"  liter\":false, \"  obj\":{\"inter\" : 789} }";
 	LeptJsonReader reader;
 	reader.LoadFromString(text);
@@ -31,40 +40,6 @@ int main()
 		}
 
 	}
-	*/
-
-	//UnitTest::Instance().TestAll();
-	std::istringstream input("nul");
-	std::queue<char> buffer;
-	while (!buffer.empty())
-		buffer.pop();
-
-	char ch;
-	std::string src("null");
-	size_t len = src.length();
-	size_t cnt = 0;
-	bool bSuccess = true;
-
-	while (input && !input.eof() && len > 0) {
-		input.get(ch);
-		std::cout << ch;
-		if (src[cnt] == ch) {
-			buffer.push(ch);
-			cnt++;
-			len--;
-		}
-		else {
-			input.putback(ch);
-			bSuccess = false;
-			break;
-		}
-	}
-	std::cout << std::endl;
-	while (!buffer.empty()) {
-		std::cout << buffer.front();
-		buffer.pop();
-	}
-	std::cout << std::endl;
-
+	
 	return 0;
 }
