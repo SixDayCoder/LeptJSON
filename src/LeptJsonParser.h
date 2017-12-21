@@ -10,10 +10,18 @@ namespace leptjson {
 	enum class LeptJsonParseRet
 	{
 		LEPT_JSON_PARSE_SUCCESS,
-		LEPT_JSON_PARSE_INVALID_VALUE,
+		LEPT_JSON_PARSE_FAIL
 	};
 
+	enum class LeptJsonGenRet
+	{
+		LEPT_JSON_Stringify_SUCCESS,
+		LEPT_JSON_Stringify_FAIL
+	};
 
+	/************************************************************************/
+	/* 解析器                                                                */
+	/************************************************************************/
 	class LeptJsonReader 
 	{
 
@@ -70,7 +78,43 @@ namespace leptjson {
 		Boolean ParseKey(std::istream& input, String& key);
 
 	};
+	
 
+	/************************************************************************/
+	/* 生成器                                                                */
+	/************************************************************************/
+	class LeptJsonWriter {
+	private:
+
+		LeptJsonValuePtr m_value;
+
+		Boolean m_isStringifiied;
+
+		std::ostringstream m_output;
+
+	public:
+
+		LeptJsonWriter() { m_isStringifiied = false; }
+		~LeptJsonWriter();
+
+		//字面值和String
+		void Push(const String& key, const String& str);
+
+		void Push(const String& key, Number number);
+		
+		void Push(const String& key, const Array& vec);
+
+		void Push(const String& key, const Object& obj);
+
+		void Stringify();
+		
+		void StringifyValue(std::ostream& output, const LeptJsonValue& val);
+
+		void StringifyString(std::ostream& output, const String& val);
+
+		void Write(const char* filepath);
+
+	};
 }
 
 #endif

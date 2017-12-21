@@ -327,7 +327,7 @@ namespace leptjson {
 		LeptJsonReader reader;
 		reader.LoadFromString(json);
 		reader.Parse();
-		ExpectEqActual(LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE, reader.ParseState());
+		ExpectEqActual(LeptJsonParseRet::LEPT_JSON_PARSE_FAIL, reader.ParseState());
 		LeptJsonValue& value = reader.ParseResult();
 		ExpectEqActual(LeptJsonType::LEPT_JSON_EMPTY, value.GetType());
 	}

@@ -13,6 +13,7 @@ namespace leptjson {
 	/* 前置声明和类型重定义                                                  */
 	/************************************************************************/
 	class LeptJsonReader;
+	class LeptJsonWriter;
 	class LeptJsonValue;
 	class Array;
 
@@ -59,15 +60,15 @@ namespace leptjson {
 
 		void push_back(const LeptJsonValuePtr& val) {
 				m_val.push_back(val);
-			}
+		}
 
 		const LeptJsonValuePtr& operator[](size_t index)const {
 				return m_val[index];
-			}
+		}
 
 		LeptJsonValuePtr& operator[](size_t index){
 				return m_val[index];
-			}
+		}
 
 		friend std::ostream& operator<<(std::ostream& output, const Array& rhs);
 	};
@@ -136,13 +137,16 @@ namespace leptjson {
 	/************************************************************************/
 	class LeptJsonValue 
 	{
-
 	public:
+
 		static std::ostream& FormatValue(std::ostream& output, const LeptJsonValue& v);
 
 	public:
+
 		friend class LeptJsonReader;
+		friend class LeptJsonWriter;
 		friend std::ostream& operator<<(std::ostream& output, const LeptJsonValue& v);
+
 	private:
 
 		LeptJsonType type;
@@ -161,6 +165,10 @@ namespace leptjson {
 	public:
 		
 		LeptJsonValue();
+		LeptJsonValue(Number number);
+		LeptJsonValue(const String& src);
+		LeptJsonValue(const Array& vec);
+		LeptJsonValue(const Object& obj);
 		~LeptJsonValue();
 
 		void Reset();
@@ -243,7 +251,6 @@ namespace leptjson {
 		LeptJsonType GetType()const {
 			return type;
 		}
-
 
 	};
 }

@@ -14,6 +14,47 @@ namespace leptjson {
 		memset(&values, 0, sizeof(Container));
 	}
 
+	LeptJsonValue::LeptJsonValue(Number number)
+	{
+		isHaveKeys = false;
+		memset(&values, 0, sizeof(Container));
+
+		values.numberValue = number;
+		SetType(LeptJsonType::LEPT_JSON_NUMBER);
+	}
+
+	LeptJsonValue::LeptJsonValue(const String & src)
+	{
+		isHaveKeys = false;
+		memset(&values, 0, sizeof(Container));
+
+		if (src == "null") {
+			SetType(LeptJsonType::LEPT_JSON_NULL);
+		}
+		else if (src == "false") {
+			SetType(LeptJsonType::LEPT_JSON_FALSE);
+		}
+		else if (src == "true") {
+			SetType(LeptJsonType::LEPT_JSON_TRUE);
+		}
+		else {
+			values.stringValue = new String(src);
+			SetType(LeptJsonType::LEPT_JSON_STRING);
+		}
+	}
+
+	LeptJsonValue::LeptJsonValue(const Array & vec)
+	{
+		isHaveKeys = false;
+		memset(&values, 0, sizeof(Container));
+		//TODO
+
+	}
+
+	LeptJsonValue::LeptJsonValue(const Object & obj)
+	{
+	}
+
 	LeptJsonValue::~LeptJsonValue()
 	{
 		if (type == LeptJsonType::LEPT_JSON_STRING && values.stringValue != 0) {
@@ -50,6 +91,8 @@ namespace leptjson {
 			values.numberValue = 0;
 		}
 	}
+
+
 
 	std::ostream & LeptJsonValue::FormatValue(std::ostream & output, const LeptJsonValue& v)
 	{

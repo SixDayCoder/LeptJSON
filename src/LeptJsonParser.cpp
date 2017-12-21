@@ -6,7 +6,9 @@
 
 namespace leptjson {
 
-
+	/************************************************************************/
+	/* 解析器                                                                */
+	/************************************************************************/
 	void LeptJsonReader::LoadFromString(const char * json)
 	{
 		m_input = std::istringstream(json);
@@ -34,6 +36,7 @@ namespace leptjson {
 	{
 		if (m_value != 0) {
 			delete m_value;
+			m_value = 0;
 		}
 	}
 
@@ -122,7 +125,7 @@ namespace leptjson {
 				input >> std::ws;
 				if (!input.eof()) {
 					value.SetType(LeptJsonType::LEPT_JSON_EMPTY);
-					return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+					return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 				}
 			}
 		}
@@ -135,7 +138,7 @@ namespace leptjson {
 		input >> std::ws;
 		//空字符串
 		if (input.eof()) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 		}
 		else {
 			char ch = input.peek();
@@ -173,7 +176,7 @@ namespace leptjson {
 				case '\"': return ParseString(input, value); break;
 				default: {
 					if (isalpha(ch)) 
-						return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+						return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 					else
 						return ParseNumber(input, value); break;
 				}
@@ -184,7 +187,7 @@ namespace leptjson {
 	LeptJsonParseRet LeptJsonReader::ParseLiteral(std::istream& input, const char* literal, LeptJsonValue& value)
 	{
 		if (!TryMatchString(input, literal)) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 		}
 		else {
 			if (literal == "null") {
@@ -213,7 +216,7 @@ namespace leptjson {
 			//fail之后记得clear
 			input.clear();
 			input.seekg(rollback);
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 		}
 		else {
 			value.SetType(LeptJsonType::LEPT_JSON_NUMBER);
@@ -229,7 +232,7 @@ namespace leptjson {
 
 		//开头必须是"
 		if (!TryMatchChar(input, delimiter)) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 		}
 
 		ch = input.peek();
@@ -269,14 +272,14 @@ namespace leptjson {
 							case 't': buffer.push_back('\t'); break;
 							//TODO-Unicode
 							//否则是不合法的转义字符序列
-							default: return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE; break;
+							default: return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL; break;
 						}
 					break;
 
 					//默认情况添加字符到buffer
 					default: 
 						if (static_cast<unsigned char>(ch) < 0x20) {
-							return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+							return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 						}
 						else{
 							buffer.push_back(ch);
@@ -285,13 +288,13 @@ namespace leptjson {
 				}
 			}
 		}
-		return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+		return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 	}
 
 	LeptJsonParseRet LeptJsonReader::ParseArray(std::istream & input, LeptJsonValue & value)
 	{
 		if (!TryMatchChar(input, '[')) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 		}
 
 		char ch = '\0';
@@ -315,7 +318,7 @@ namespace leptjson {
 		} while (TryMatchChar(input, ','));
 
 		if (!TryMatchChar(input, ']')) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 		}
 
 		return ret;
@@ -324,7 +327,7 @@ namespace leptjson {
 	LeptJsonParseRet LeptJsonReader::ParseObject(std::istream & input, LeptJsonValue & value)
 	{
 		if (!TryMatchChar(input, '{')) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 		}
 		char ch = '\0';
 		ch = input.peek();
@@ -337,12 +340,12 @@ namespace leptjson {
 		do {
 			String key;
 			if (!ParseKey(input, key)) {
-				ret = LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+				ret = LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 				break;
 			}
 
 			if (!TryMatchChar(input, ':')) {
-				ret = LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+				ret = LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 				break;
 			}
 
@@ -359,7 +362,7 @@ namespace leptjson {
 		} while (TryMatchChar(input, ','));
 
 		if (!TryMatchChar(input, '}')) {
-			return LeptJsonParseRet::LEPT_JSON_PARSE_INVALID_VALUE;
+			return LeptJsonParseRet::LEPT_JSON_PARSE_FAIL;
 		}
 		return ret;
 	}
@@ -402,6 +405,176 @@ namespace leptjson {
 		}
 		//直到流结束都没碰到delimiter,说明解析失败
 		return false;
+	}
+
+
+
+
+	/************************************************************************/
+	/* 生成器                                                                */
+	/************************************************************************/
+
+	LeptJsonWriter::~LeptJsonWriter()
+	{
+		if (m_value != 0) {
+			delete m_value;
+			m_value = 0;
+		}
+	}
+
+	void LeptJsonWriter::Push(const String & key, const String & str)
+	{
+		String src(str);
+
+		src.erase(0, src.find_first_not_of(" "));
+		src.erase(src.find_last_not_of(' ') + 1);
+
+		//literal
+		if (src == "null") {
+			LeptJsonValue* val = new LeptJsonValue();
+			val->SetType(LeptJsonType::LEPT_JSON_NULL);
+		}
+		else if (src == "true") {
+			LeptJsonValue* val = new LeptJsonValue();
+			val->SetType(LeptJsonType::LEPT_JSON_TRUE);
+		}
+		else if (src == "false") {
+			LeptJsonValue* val = new LeptJsonValue();
+			val->SetType(LeptJsonType::LEPT_JSON_FALSE);
+		}
+		else {
+			LeptJsonValue* val = new LeptJsonValue();
+			val->values.stringValue = new String(src);
+			val->SetType(LeptJsonType::LEPT_JSON_STRING);
+			//insert
+		}
+	}
+
+	void LeptJsonWriter::Push(const String & key, Number number)
+	{
+		LeptJsonValue* val = new LeptJsonValue();
+		val->values.numberValue = number;
+		val->SetType(LeptJsonType::LEPT_JSON_NUMBER);
+	}
+
+	void LeptJsonWriter::Push(const String & key, const Array & vec)
+	{
+		LeptJsonValue* val = new LeptJsonValue();
+		val->values.arrayValue = new Array(vec);
+		val->SetType(LeptJsonType::LEPT_JSON_ARRAY);
+	}
+
+	void LeptJsonWriter::Push(const String & key, const Object & obj)
+	{
+		LeptJsonValue* val = new LeptJsonValue();
+		val->values.objectValue = new Object(obj);
+		val->SetType(LeptJsonType::LEPT_JSON_OBJECT);
+	}
+
+	void LeptJsonWriter::Stringify()
+	{
+		if (m_value == nullptr) {
+			m_value = new LeptJsonValue();
+		}
+		else {
+			m_value->Reset();
+		}
+		StringifyValue(m_output, *m_value);
+		//TODO Gen-Json
+		m_isStringifiied = true;
+	}
+
+	void LeptJsonWriter::StringifyValue(std::ostream & output, const LeptJsonValue & val)
+	{
+		LeptJsonType type = val.GetType();
+
+		switch (type)
+		{
+			case leptjson::LeptJsonType::LEPT_JSON_EMPTY:
+				output << "Empty Value" << std::endl;
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_NULL:
+				output << "null";
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_TRUE:
+				output << "true";
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_FALSE:
+				output << "false";
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_NUMBER: {
+				Number number = val.GetNumber();
+				output << number;
+			}
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_STRING: {
+				const String& src = val.GetString();
+				StringifyString(output, src);
+			}
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_ARRAY: {
+				const Array& vec = val.GetArray();
+				output << '[';
+				for (size_t i = 0; i < vec.size(); ++i) {
+					StringifyValue(output, *vec[i]);
+					if (i != vec.size() - 1) output << ',';
+				}
+				output << ']';
+			}
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_OBJECT: {
+				const Object& obj = val.GetObject();
+				output << '{';
+				auto delimater = obj.end();
+				delimater--;
+				for (auto it = obj.begin(); it != obj.end(); ++it) {
+					const String& key = it->first;
+					const LeptJsonValue& v = *it->second;
+					output << key << " : ";
+					StringifyValue(output, val);
+					if (it != delimater) output << ',';
+				}
+				output << '}';
+			}
+			break;
+			default:
+			break;
+		}
+	}
+
+	void LeptJsonWriter::StringifyString(std::ostream & output, const String & val)
+	{
+		output  << '"';
+
+		for (size_t i = 0; i < val.length(); ++i) {
+			//char curr = val[i];
+			unsigned char ch = static_cast<unsigned char>(val[i]);
+			switch (ch){
+				case '\"': output << "\\\""; break;
+				case '\\': output << "\\\\"; break;
+				case '\b': output << "\\b";  break;
+				case '\f': output << "\\f";  break;
+				case '\n': output << "\\n";  break;
+				case '\r': output << "\\r";  break;
+				case '\t': output << "\\t";  break;
+				default:   output << ch;     break;
+			}
+
+		}
+
+		output << '"';
+	}
+
+	void LeptJsonWriter::Write(const char * filepath)
+	{
+		if (m_isStringifiied == false) return;
+
+		std::wfstream file(filepath, std::ios::out);
+		assert(file.is_open());
+
+		file << m_output.rdbuf();
+
+		file.close();
 	}
 
 }
