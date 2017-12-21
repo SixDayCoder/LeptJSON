@@ -20,26 +20,37 @@ int main()
 	/************************************************************************/
 	const char* text = "{\"   title  \":\"windows\", \"empty\":[], \"   arr\":[123,[12, 23, 34],null,[] , {}, \"string\"],\"num  \":1234, \"  liter\":false, \"  obj\":{\"inter\" : 789} }";
 	LeptJsonReader reader;
-	reader.LoadFromString(text);
-	//LeptJsonReader reader;
-	//reader.LoadFromFile("example2.txt");
+	//reader.LoadFromString(text);
+	reader.LoadFromFile("example1.txt");
 	reader.Parse();
+
+	LeptJsonWriter writer;
+
 	if (LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS == reader.ParseState()) {
-
 		LeptJsonValue& value = reader.ParseResult();
-
 		if (value.IsHaveKeys()) {
 			Object& obj = value.GetObject();
-			std::cout << obj << std::endl;
-			const LeptJsonValuePtr& val = obj["title"];
-			//auto val = obj["empty"];
-			//std::cout << *val << std::endl;
-		}
-		else {
-			std::cout << reader.ParseResult() << std::endl;
-		}
+			for (auto it = obj.begin(); it != obj.end(); ++it) {
+				const String& key = it->first;
+				const LeptJsonValue& val = *it->second;
+				writer.Push(key, val);
 
+			}
+		}
 	}
-	
+
+	writer.Write("output.txt");
+
+	//if (LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS == reader.ParseState()) {
+	//	LeptJsonValue& value = reader.ParseResult();
+	//	if (value.IsHaveKeys()) {
+	//		Object& obj = value.GetObject();
+	//		std::cout << obj << std::endl;
+	//	}
+	//	else {
+	//		std::cout << reader.ParseResult() << std::endl;
+	//	}
+	//}
+
 	return 0;
 }

@@ -33,8 +33,8 @@ namespace leptjson {
 
 	public:
 		
-		LeptJsonReader() {}
-		~LeptJsonReader();
+		LeptJsonReader() { m_value = 0; }
+		~LeptJsonReader() {}
 
 		void LoadFromString(const char* json);
 		void LoadFromFile(const char* filepath);
@@ -90,14 +90,17 @@ namespace leptjson {
 
 		Boolean m_isStringifiied;
 
+		std::map<String, LeptJsonValuePtr> m_map;
+
 		std::ostringstream m_output;
 
 	public:
 
-		LeptJsonWriter() { m_isStringifiied = false; }
-		~LeptJsonWriter();
+		LeptJsonWriter() { m_isStringifiied = false; m_value = 0;  }
+		~LeptJsonWriter() {}
 
-		//×ÖÃæÖµºÍString
+		void Push(const String& key, const LeptJsonValue& val);
+
 		void Push(const String& key, const String& str);
 
 		void Push(const String& key, Number number);

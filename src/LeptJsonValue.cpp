@@ -9,15 +9,12 @@ namespace leptjson {
 	LeptJsonValue::LeptJsonValue()
 	{
 		type = LeptJsonType::LEPT_JSON_EMPTY;
-		isHaveKeys = false;
-		//清空共享内存
-		memset(&values, 0, sizeof(Container));
+		isHaveKeys = false;	
 	}
 
 	LeptJsonValue::LeptJsonValue(Number number)
 	{
 		isHaveKeys = false;
-		memset(&values, 0, sizeof(Container));
 
 		values.numberValue = number;
 		SetType(LeptJsonType::LEPT_JSON_NUMBER);
@@ -38,7 +35,7 @@ namespace leptjson {
 			SetType(LeptJsonType::LEPT_JSON_TRUE);
 		}
 		else {
-			values.stringValue = new String(src);
+			values.stringValue = std::make_shared<String>(src);
 			SetType(LeptJsonType::LEPT_JSON_STRING);
 		}
 	}
@@ -46,45 +43,27 @@ namespace leptjson {
 	LeptJsonValue::LeptJsonValue(const Array & vec)
 	{
 		isHaveKeys = false;
-		memset(&values, 0, sizeof(Container));
-		//TODO
-
+		values.arrayValue = std::make_shared<Array>(vec);
+		SetType(LeptJsonType::LEPT_JSON_ARRAY);
 	}
 
 	LeptJsonValue::LeptJsonValue(const Object & obj)
 	{
+		isHaveKeys = false;
+		values.objectValue = std::make_shared<Object>(obj);
+		SetType(LeptJsonType::LEPT_JSON_OBJECT);
 	}
 
-	LeptJsonValue::~LeptJsonValue()
-	{
-		if (type == LeptJsonType::LEPT_JSON_STRING && values.stringValue != 0) {
-			delete values.stringValue;
-			values.stringValue = 0;
-		}
-		else if (type == LeptJsonType::LEPT_JSON_ARRAY && values.arrayValue != 0) {
-			delete values.arrayValue;
-			values.arrayValue = 0;
-		}
-		else if (type == LeptJsonType::LEPT_JSON_OBJECT && values.objectValue != 0) {
-			delete values.objectValue;
-			values.objectValue = 0;
-		}
-
-		memset(&values, 0, sizeof(Container));
-	}
 
 	void LeptJsonValue::Reset()
 	{
 		if (type == LeptJsonType::LEPT_JSON_STRING) {
-			delete values.stringValue;
 			values.stringValue = 0;
 		}
 		else if (type == LeptJsonType::LEPT_JSON_ARRAY) {
-			delete values.arrayValue;
 			values.arrayValue = 0;
 		}
 		else if (type == LeptJsonType::LEPT_JSON_OBJECT) {
-			delete values.objectValue;
 			values.objectValue = 0;
 		}
 		else if (type == LeptJsonType::LEPT_JSON_NUMBER) {
@@ -159,16 +138,15 @@ namespace leptjson {
 		else
 		{
 			output << '{';
-			//不可end直接-1因为是随机访问迭代器而非顺序
-			auto delimater = rhs.m_map.end();
-			delimater--;
-			for (auto it = rhs.m_map.begin(); it != rhs.m_map.end(); it++) {
+			auto it = rhs.m_map.begin();
+			while (it != rhs.m_map.end()) {
 				const String& key = it->first;
 				const LeptJsonValue&  val = *it->second;
 				output << key << " : ";
 				LeptJsonValue::FormatValue(output, val);
-				if(it != delimater)
-					output << std::endl;
+				it++;
+				if (it != rhs.m_map.end())
+					output << ',';
 			}
 			output << '}';
 		}

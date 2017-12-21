@@ -157,8 +157,9 @@
     <ClCompile Include="..\..\..\src\UnitTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\..\json\example1.txt" />
-    <Text Include="..\..\..\json\example2.txt" />
+    <Text Include="example1.txt" />
+    <Text Include="example2.txt" />
+    <Text Include="output.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

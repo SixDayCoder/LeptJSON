@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <istream>
+#include <memory>
 #include <cassert>
 
 namespace leptjson {
@@ -16,12 +17,15 @@ namespace leptjson {
 	class LeptJsonWriter;
 	class LeptJsonValue;
 	class Array;
+	class Object;
 
 	using Number = double;
 	using Boolean = bool;
 	using String = std::string;
-	using StringPtr = String*;
-	using LeptJsonValuePtr = LeptJsonValue*;
+	using StringPtr = std::shared_ptr<std::string>;
+	using ArrayPtr = std::shared_ptr<Array>;
+	using ObjectPtr = std::shared_ptr<Object>;
+	using LeptJsonValuePtr = std::shared_ptr<LeptJsonValue>;
 
 	/************************************************************************/
 	/* 预定义enum                                                            */
@@ -42,9 +46,23 @@ namespace leptjson {
 	/* 封装Array                                                            */
 	/************************************************************************/
 	class Array {
-	private:
-		std::vector<LeptJsonValuePtr> m_val;
+
 	public:
+
+		static ArrayPtr CreateLeptJsonArray()
+		{
+			ArrayPtr vec = std::make_shared<Array>();
+			return vec;
+		}
+
+	private:
+
+		std::vector<LeptJsonValuePtr> m_val;
+
+	public:
+
+		friend class LeptJsonReader;
+		friend class LeptJsonWriter;
 
 		Array() {
 			m_val.clear();
@@ -72,21 +90,39 @@ namespace leptjson {
 
 		friend std::ostream& operator<<(std::ostream& output, const Array& rhs);
 	};
-	using ArrayPtr = Array*;
+
 
 	/************************************************************************/
 	/* 封装Object                                                           */
 	/************************************************************************/
 	class Object {
-	private:
-		std::map<String, LeptJsonValuePtr> m_map;
 	public:
 
+		static ObjectPtr CreateLeptJsonObject() 
+		{
+			ObjectPtr obj = std::make_shared<Object>();
+			return obj;
+		}
+
+	private:
+
+		std::map<String, LeptJsonValuePtr> m_map;
+
+	public:
+
+		friend class LeptJsonReader;
+		friend class LeptJsonWriter;
 		using iterator = std::map<std::string, LeptJsonValuePtr>::iterator;
 		using const_iterator = std::map<std::string, LeptJsonValuePtr>::const_iterator;
 
-		Object() {
+		Object() 
+		{
 			m_map.clear();
+		}
+
+		Object(const std::map<String, LeptJsonValuePtr>& m)
+		{
+			m_map = m;
 		}
 
 		const_iterator begin() const {
@@ -130,7 +166,7 @@ namespace leptjson {
 		friend std::ostream& operator<<(std::ostream& output, const Object& rhs);
 
 	};
-	using ObjectPtr = Object*;
+
 
 	/************************************************************************/
 	/* 抽象,JsonValue                                                       */
@@ -138,6 +174,12 @@ namespace leptjson {
 	class LeptJsonValue 
 	{
 	public:
+
+		static LeptJsonValuePtr CreateLeptJsonValue() 
+		{
+			LeptJsonValuePtr val = std::make_shared<LeptJsonValue>();
+			return val;
+		}
 
 		static std::ostream& FormatValue(std::ostream& output, const LeptJsonValue& v);
 
@@ -151,7 +193,7 @@ namespace leptjson {
 
 		LeptJsonType type;
 
-		union Container
+		struct Container
 		{
 			Number numberValue;
 			StringPtr stringValue;
@@ -169,86 +211,144 @@ namespace leptjson {
 		LeptJsonValue(const String& src);
 		LeptJsonValue(const Array& vec);
 		LeptJsonValue(const Object& obj);
-		~LeptJsonValue();
 
 		void Reset();
 		
-		Boolean IsHaveKeys()const {
+		Boolean IsHaveKeys()const 
+		{
 			return isHaveKeys == true;
 		}
 
-		Boolean IsNull()const {
+		Boolean IsNull()const 
+		{
 			return type == LeptJsonType::LEPT_JSON_NULL;
 		}
-		String GetNull()const{
+		String GetNull()const
+		{
 			assert(IsNull());
 			return "null";
 		}
+		void SetNull()
+		{
+			Reset();
+			SetType(LeptJsonType::LEPT_JSON_NULL);
+		}
 
-		Boolean IsTrue()const {
+		Boolean IsTrue()const 
+		{
 			return type == LeptJsonType::LEPT_JSON_TRUE;
 		}
-		String GetTrue()const{
+		String GetTrue()const
+		{
 			assert(IsTrue());
 			return "true";
 		}
+		void SetTrue()
+		{
+			Reset();
+			SetType(LeptJsonType::LEPT_JSON_TRUE);
+		}
 
-		Boolean IsFalse()const {
+		Boolean IsFalse()const 
+		{
 			return type == LeptJsonType::LEPT_JSON_FALSE;
 		}
-		String GetFalse()const {
+		String GetFalse()const 
+		{
 			assert(IsFalse());
 			return "false";
 		}
+		void SetFalse()
+		{
+			Reset();
+			SetType(LeptJsonType::LEPT_JSON_FALSE);
+		}
 
-		Boolean IsNumber()const {
+		Boolean IsNumber()const 
+		{
 			return type == LeptJsonType::LEPT_JSON_NUMBER;
 		}
-		Number GetNumber()const {
+		Number GetNumber()const 
+		{
 			assert(IsNumber());
 			return values.numberValue;
 		}
+		void SetNumber(Number number) 
+		{
+			Reset();
+			values.numberValue = number;
+			SetType(LeptJsonType::LEPT_JSON_NUMBER);
+		}
 
-		Boolean IsString()const {
+		Boolean IsString()const 
+		{
 			return type == LeptJsonType::LEPT_JSON_STRING;
 		}
-		const String& GetString()const {
+		const String& GetString()const 
+		{
 			assert(IsString());
 			return *values.stringValue;
 		}
-		String& GetString() {
+		String& GetString() 
+		{
 			assert(IsString());
 			return *values.stringValue;
+		}
+		void SetString(const String& src)
+		{
+			Reset();
+			values.stringValue = std::make_shared<String>(src);
+			SetType(LeptJsonType::LEPT_JSON_STRING);
 		}
 
-		Boolean IsArray()const {
+		Boolean IsArray()const
+		{
 			return type == LeptJsonType::LEPT_JSON_ARRAY;
 		}
-		const Array& GetArray()const {
+		const Array& GetArray()const 
+		{
 			assert(IsArray());
 			return *values.arrayValue;
 		}
-		Array& GetArray() {
+		Array& GetArray() 
+		{
 			assert(IsArray());
 			return *values.arrayValue;
+		}
+		void SetArray(const Array& vec)
+		{
+			Reset();
+			values.arrayValue = std::make_shared<Array>(vec);
+			SetType(LeptJsonType::LEPT_JSON_ARRAY);
 		}
 
-		Boolean IsObject()const {
+		Boolean IsObject()const 
+		{
 			return type == LeptJsonType::LEPT_JSON_OBJECT;
 		}
-		const Object& GetObject()const {
+		const Object& GetObject()const 
+		{
 			assert(IsObject());
 			return *values.objectValue;
 		}
-		Object& GetObject() {
+		Object& GetObject() 
+		{
 			assert(IsObject());
 			return *values.objectValue;
+		}
+		void SetObject(const Object& obj)
+		{
+			Reset();
+			values.objectValue = std::make_shared<Object>(obj);
+			SetType(LeptJsonType::LEPT_JSON_OBJECT);
 		}
 
-		void SetType(LeptJsonType type) {
+		void SetType(LeptJsonType type)
+		{
 			this->type = type;
 		}
-		LeptJsonType GetType()const {
+		LeptJsonType GetType()const
+		{
 			return type;
 		}
 

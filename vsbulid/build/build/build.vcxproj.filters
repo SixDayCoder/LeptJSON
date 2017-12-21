@@ -40,10 +40,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\..\json\example1.txt">
+    <Text Include="example1.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="..\..\..\json\example2.txt">
+    <Text Include="example2.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="output.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

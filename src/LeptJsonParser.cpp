@@ -32,14 +32,6 @@ namespace leptjson {
 		}
 	}
 
-	LeptJsonReader::~LeptJsonReader()
-	{
-		if (m_value != 0) {
-			delete m_value;
-			m_value = 0;
-		}
-	}
-
 	Boolean LeptJsonReader::TryMatchChar(std::istream & input, char ch)
 	{
 		//skip ws
@@ -107,7 +99,7 @@ namespace leptjson {
 	void LeptJsonReader::Parse()
 	{
 		if (m_value == 0) {
-			m_value = new LeptJsonValue();
+			m_value = LeptJsonValue::CreateLeptJsonValue();
 		}
 		else {
 			m_value->Reset();
@@ -149,10 +141,10 @@ namespace leptjson {
 				case 't': return ParseLiteral(input, "true", value); break;
 				case 'f': return ParseLiteral(input, "false", value); break;
 				case '[': {
-					value.values.arrayValue = new Array();
+					value.values.arrayValue = std::make_shared<Array>();
 					ret = ParseArray(input, value);
 					if (ret != LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS) {
-						delete value.values.arrayValue;
+						value.Reset();
 					}
 					if (ret == LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS) {
 						value.SetType(LeptJsonType::LEPT_JSON_ARRAY);
@@ -161,10 +153,10 @@ namespace leptjson {
 				}
 				break;
 				case '{': {
-					value.values.objectValue = new Object();
+					value.values.objectValue = std::make_shared <Object>();
 					ret = ParseObject(input, value);
 					if (ret != LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS) {
-						delete value.values.objectValue;
+						value.Reset();
 					}
 					if (ret == LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS) {
 						value.SetType(LeptJsonType::LEPT_JSON_OBJECT);
@@ -240,7 +232,7 @@ namespace leptjson {
 			//如果是空字符串""
 			input.get(ch);
 			value.SetType(LeptJsonType::LEPT_JSON_STRING);
-			value.values.stringValue= new String("");
+			value.values.stringValue= std::make_shared<String>("");
 			return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
 		}
 		else {
@@ -254,7 +246,7 @@ namespace leptjson {
 					//成功解析字符串
 					case '\"': 
 						value.SetType(LeptJsonType::LEPT_JSON_STRING);
-						value.values.stringValue = new String(buffer);
+						value.values.stringValue = std::make_shared<String>(buffer);
 						return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
 					break;
 
@@ -301,17 +293,17 @@ namespace leptjson {
 		ch = input.peek();
 		if (TryMatchChar(input, ']')) {
 			value.SetType(LeptJsonType::LEPT_JSON_ARRAY);
-			value.values.arrayValue = new Array();
+			value.values.arrayValue = std::make_shared<Array>();
 			return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
 		}
 
 		LeptJsonParseRet ret;
 
 		do {
-			LeptJsonValue* v = new LeptJsonValue();
+			LeptJsonValuePtr v = LeptJsonValue::CreateLeptJsonValue();
 			ret = ParseLeptJsonValue(input, *v);
 			if (ret != LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS) {
-				delete v;
+				v->Reset();
 				break;
 			}
 			value.values.arrayValue->push_back(v);
@@ -333,7 +325,7 @@ namespace leptjson {
 		ch = input.peek();
 		if (TryMatchChar(input, '}')) {
 			value.SetType(LeptJsonType::LEPT_JSON_OBJECT);
-			value.values.objectValue = new Object();
+			value.values.objectValue = std::make_shared<Object>();
 			return LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS;
 		}
 		LeptJsonParseRet ret;
@@ -349,11 +341,11 @@ namespace leptjson {
 				break;
 			}
 
-			LeptJsonValue *v = new LeptJsonValue();
+			LeptJsonValuePtr v = LeptJsonValue::CreateLeptJsonValue();
 			ret = ParseLeptJsonValue(input, *v);
 
 			if (ret != LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS) {
-				delete v;
+				v->Reset();
 				break;
 			}
 			value.isHaveKeys = true;
@@ -407,18 +399,39 @@ namespace leptjson {
 		return false;
 	}
 
-
-
-
 	/************************************************************************/
 	/* 生成器                                                                */
 	/************************************************************************/
 
-	LeptJsonWriter::~LeptJsonWriter()
+	void LeptJsonWriter::Push(const String & key, const LeptJsonValue & val)
 	{
-		if (m_value != 0) {
-			delete m_value;
-			m_value = 0;
+		LeptJsonType type = val.GetType();
+
+		switch (type){
+			case leptjson::LeptJsonType::LEPT_JSON_EMPTY:
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_NULL:
+				Push(key, "null");
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_TRUE:
+				Push(key, "true");
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_FALSE:
+				Push(key, "false");
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_NUMBER:
+				Push(key, val.GetNumber());
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_STRING:
+				Push(key, val.GetString());
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_ARRAY:
+				Push(key, val.GetArray());
+			break;
+			case leptjson::LeptJsonType::LEPT_JSON_OBJECT:
+				Push(key, val.GetObject());
+			break;
+			default:	break;
 		}
 	}
 
@@ -431,56 +444,55 @@ namespace leptjson {
 
 		//literal
 		if (src == "null") {
-			LeptJsonValue* val = new LeptJsonValue();
+			LeptJsonValuePtr val = LeptJsonValue::CreateLeptJsonValue();
 			val->SetType(LeptJsonType::LEPT_JSON_NULL);
+			m_map.insert(std::make_pair(key, val));
 		}
 		else if (src == "true") {
-			LeptJsonValue* val = new LeptJsonValue();
+			LeptJsonValuePtr val = LeptJsonValue::CreateLeptJsonValue();
 			val->SetType(LeptJsonType::LEPT_JSON_TRUE);
+			m_map.insert(std::make_pair(key, val));
 		}
 		else if (src == "false") {
-			LeptJsonValue* val = new LeptJsonValue();
+			LeptJsonValuePtr val = LeptJsonValue::CreateLeptJsonValue();
 			val->SetType(LeptJsonType::LEPT_JSON_FALSE);
+			m_map.insert(std::make_pair(key, val));
 		}
 		else {
-			LeptJsonValue* val = new LeptJsonValue();
-			val->values.stringValue = new String(src);
-			val->SetType(LeptJsonType::LEPT_JSON_STRING);
+			LeptJsonValuePtr val = LeptJsonValue::CreateLeptJsonValue();
+			val->SetString(src);
+			m_map.insert(std::make_pair(key, val));
 			//insert
 		}
 	}
 
 	void LeptJsonWriter::Push(const String & key, Number number)
 	{
-		LeptJsonValue* val = new LeptJsonValue();
-		val->values.numberValue = number;
-		val->SetType(LeptJsonType::LEPT_JSON_NUMBER);
+		LeptJsonValuePtr val = LeptJsonValue::CreateLeptJsonValue();
+		val->SetNumber(number);
+		m_map.insert(std::make_pair(key, val));
 	}
 
 	void LeptJsonWriter::Push(const String & key, const Array & vec)
 	{
-		LeptJsonValue* val = new LeptJsonValue();
-		val->values.arrayValue = new Array(vec);
-		val->SetType(LeptJsonType::LEPT_JSON_ARRAY);
+		LeptJsonValuePtr val = LeptJsonValue::CreateLeptJsonValue();
+		val->SetArray(vec);
+		m_map.insert(std::make_pair(key, val));
 	}
 
 	void LeptJsonWriter::Push(const String & key, const Object & obj)
 	{
-		LeptJsonValue* val = new LeptJsonValue();
-		val->values.objectValue = new Object(obj);
-		val->SetType(LeptJsonType::LEPT_JSON_OBJECT);
+		LeptJsonValuePtr val = LeptJsonValue::CreateLeptJsonValue();
+		val->SetObject(obj);
+		m_map.insert(std::make_pair(key, val));
 	}
 
 	void LeptJsonWriter::Stringify()
 	{
-		if (m_value == nullptr) {
-			m_value = new LeptJsonValue();
-		}
-		else {
-			m_value->Reset();
+		if (m_value == 0) {
+			m_value = std::make_shared<LeptJsonValue>(m_map);
 		}
 		StringifyValue(m_output, *m_value);
-		//TODO Gen-Json
 		m_isStringifiied = true;
 	}
 
@@ -525,14 +537,14 @@ namespace leptjson {
 			case leptjson::LeptJsonType::LEPT_JSON_OBJECT: {
 				const Object& obj = val.GetObject();
 				output << '{';
-				auto delimater = obj.end();
-				delimater--;
-				for (auto it = obj.begin(); it != obj.end(); ++it) {
+				auto it = obj.begin();
+				while (it != obj.end()) {
 					const String& key = it->first;
 					const LeptJsonValue& v = *it->second;
 					output << key << " : ";
-					StringifyValue(output, val);
-					if (it != delimater) output << ',';
+					StringifyValue(output, v);
+					it++;
+					if (it != obj.end()) output << ',';
 				}
 				output << '}';
 			}
@@ -567,12 +579,17 @@ namespace leptjson {
 
 	void LeptJsonWriter::Write(const char * filepath)
 	{
-		if (m_isStringifiied == false) return;
+		if (m_isStringifiied == false) {
+			Stringify();
+		}
+		
+		std::cout << m_output.str() << std::endl;
 
 		std::wfstream file(filepath, std::ios::out);
+
 		assert(file.is_open());
 
-		file << m_output.rdbuf();
+		file << m_output.str().c_str() << std::endl;
 
 		file.close();
 	}
