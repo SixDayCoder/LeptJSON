@@ -6,45 +6,58 @@ namespace leptjson {
 	size_t UnitTest::sPassTestCount = 0;
 
 
+	void UnitTest::TestAll()
+	{
+		std::cout << std::endl;
+		TestParseAll();
+		std::cout << std::endl;
+		TestGenerateAll();
+		std::cout << std::endl;
+	}
+
+	void UnitTest::TestGenerateAll()
+	{
+	}
+
 	void UnitTest::TestParseAll()
 	{
-		TestLiteral();
+		TestParseLiteral();
 
-		TestNumber();
+		TestParseNumber();
 
-		TestString();
+		TestParseString();
 
-		TestArray();
+		TestParseArray();
 
-		TestObject();
+		TestParseObject();
 
-		TestInvalid();
+		TestParseInvalid();
 
-		printf("%d/%d (%3.2f%%) passed\n", sPassTestCount, sTotalTestCount, sPassTestCount * 100.0 / sTotalTestCount);
+		printf("Test Parser : %d/%d (%3.2f%%) passed\n", sPassTestCount, sTotalTestCount, sPassTestCount * 100.0 / sTotalTestCount);
 	}
 
-	void UnitTest::TestLiteral()
+	void UnitTest::TestParseLiteral()
 	{
-		TestLiteralCase("  null ");
+		TestParseLiteralCase("  null ");
 
-		TestLiteralCase("null");
+		TestParseLiteralCase("null");
 
-		TestLiteralCase("\n null");
+		TestParseLiteralCase("\n null");
 
-		TestLiteralCase("  false   ");
+		TestParseLiteralCase("  false   ");
 
-		TestLiteralCase("false");
+		TestParseLiteralCase("false");
 
-		TestLiteralCase("\n false");
+		TestParseLiteralCase("\n false");
 
-		TestLiteralCase("  true  ");
+		TestParseLiteralCase("  true  ");
 
-		TestLiteralCase("true");
+		TestParseLiteralCase("true");
 
-		TestLiteralCase("\n true");
+		TestParseLiteralCase("\n true");
 	}
 
-	void UnitTest::TestLiteralCase(const char * json)
+	void UnitTest::TestParseLiteralCase(const char * json)
 	{
 		LeptJsonReader reader;
 		reader.LoadFromString(json);
@@ -62,65 +75,65 @@ namespace leptjson {
 		}
 	}
 
-	void UnitTest::TestNumber()
+	void UnitTest::TestParseNumber()
 	{
-		TestNumberCase(0.0, "0");
+		TestParseNumberCase(0.0, "0");
 
-		TestNumberCase(0.0, "-0");
+		TestParseNumberCase(0.0, "-0");
 
-		TestNumberCase(0.0, "-0.0");
+		TestParseNumberCase(0.0, "-0.0");
 
-		TestNumberCase(1.0, "1");
+		TestParseNumberCase(1.0, "1");
 
-		TestNumberCase(-1.0, "-1");
+		TestParseNumberCase(-1.0, "-1");
 
-		TestNumberCase(1.5, "1.5");
+		TestParseNumberCase(1.5, "1.5");
 
-		TestNumberCase(-1.5, "-1.5");
+		TestParseNumberCase(-1.5, "-1.5");
 
-		TestNumberCase(3.1416, "3.1416");
+		TestParseNumberCase(3.1416, "3.1416");
 
-		TestNumberCase(1E10, "1E10");
+		TestParseNumberCase(1E10, "1E10");
 
-		TestNumberCase(1e10, "1e10");
+		TestParseNumberCase(1e10, "1e10");
 
-		TestNumberCase(1E+10, "1E+10");
+		TestParseNumberCase(1E+10, "1E+10");
 
-		TestNumberCase(1E-10, "1E-10");
+		TestParseNumberCase(1E-10, "1E-10");
 
-		TestNumberCase(-1E10, "-1E10");
+		TestParseNumberCase(-1E10, "-1E10");
 
-		TestNumberCase(-1e10, "-1e10");
+		TestParseNumberCase(-1e10, "-1e10");
 
-		TestNumberCase(-1E+10, "-1E+10");
+		TestParseNumberCase(-1E+10, "-1E+10");
 
-		TestNumberCase(-1E-10, "-1E-10");
+		TestParseNumberCase(-1E-10, "-1E-10");
 
-		TestNumberCase(1.234E+10, "1.234E+10");
+		TestParseNumberCase(1.234E+10, "1.234E+10");
 
-		TestNumberCase(1.234E-10, "1.234E-10");
+		TestParseNumberCase(1.234E-10, "1.234E-10");
 
-		TestNumberCase(1.0000000000000002, "1.0000000000000002"); /* the smallest number > 1 */
+		TestParseNumberCase(1.0000000000000002, "1.0000000000000002"); /* the smallest number > 1 */
 
-		TestNumberCase(4.9406564584124654e-324, "4.9406564584124654e-324"); /* minimum denormal */
+		TestParseNumberCase(4.9406564584124654e-324, "4.9406564584124654e-324"); /* minimum denormal */
 
-		TestNumberCase(-4.9406564584124654e-324, "-4.9406564584124654e-324");
+		TestParseNumberCase(-4.9406564584124654e-324, "-4.9406564584124654e-324");
 
-		TestNumberCase(2.2250738585072009e-308, "2.2250738585072009e-308");  /* Max subnormal double */
+		TestParseNumberCase(2.2250738585072009e-308, "2.2250738585072009e-308");  /* Max subnormal double */
 
-		TestNumberCase(-2.2250738585072009e-308, "-2.2250738585072009e-308");
+		TestParseNumberCase(-2.2250738585072009e-308, "-2.2250738585072009e-308");
 
-		TestNumberCase(2.2250738585072014e-308, "2.2250738585072014e-308");  /* Min normal positive double */
+		TestParseNumberCase(2.2250738585072014e-308, "2.2250738585072014e-308");  /* Min normal positive double */
 
-		TestNumberCase(-2.2250738585072014e-308, "-2.2250738585072014e-308");
+		TestParseNumberCase(-2.2250738585072014e-308, "-2.2250738585072014e-308");
 
-		TestNumberCase(1.7976931348623157e+308, "1.7976931348623157e+308");  /* Max double */
+		TestParseNumberCase(1.7976931348623157e+308, "1.7976931348623157e+308");  /* Max double */
 
-		TestNumberCase(-1.7976931348623157e+308, "-1.7976931348623157e+308");
+		TestParseNumberCase(-1.7976931348623157e+308, "-1.7976931348623157e+308");
 
 	}
 
-	void UnitTest::TestNumberCase(Number expect, const char * json)
+	void UnitTest::TestParseNumberCase(Number expect, const char * json)
 	{
 		LeptJsonReader reader; 
 		reader.LoadFromString(json); 
@@ -132,19 +145,19 @@ namespace leptjson {
 		ExpectEqActual(expect, number);
 	}
 
-	void UnitTest::TestString()
+	void UnitTest::TestParseString()
 	{
 
-		TestStringCase("", "\"\"");
+		TestParseStringCase("", "\"\"");
 
-		TestStringCase("Hello", "\"Hello\"");
+		TestParseStringCase("Hello", "\"Hello\"");
 
-		TestStringCase("Hello\nWorld", "\"Hello\\nWorld\"");
+		TestParseStringCase("Hello\nWorld", "\"Hello\\nWorld\"");
 
-		TestStringCase("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
+		TestParseStringCase("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
 	}
 
-	void UnitTest::TestStringCase(const String & expect, const char * json)
+	void UnitTest::TestParseStringCase(const String & expect, const char * json)
 	{
 		LeptJsonReader reader;
 		reader.LoadFromString(json);
@@ -156,16 +169,16 @@ namespace leptjson {
 		ExpectEqActual(expect, str);
 	}
 
-	void UnitTest::TestArray()
+	void UnitTest::TestParseArray()
 	{
-		TestArrayCase("[]");
+		TestParseArrayCase("[]");
 
-		TestArrayCase("[123, 456, 78, [123,4,\"xxxx\", null], \"ok\"]");
+		TestParseArrayCase("[123, 456, 78, [123,4,\"xxxx\", null], \"ok\"]");
 
-		TestArrayCase("[123,[1, 2, 3, [4, 5, 6]]]");
+		TestParseArrayCase("[123,[1, 2, 3, [4, 5, 6]]]");
 	}
 
-	void UnitTest::TestArrayCase(const char * json)
+	void UnitTest::TestParseArrayCase(const char * json)
 	{
 		LeptJsonReader reader;
 		reader.LoadFromString(json);
@@ -177,11 +190,11 @@ namespace leptjson {
 		//std::cout << vec << std::endl;
 	}
 
-	void UnitTest::TestObject()
+	void UnitTest::TestParseObject()
 	{
-		TestObjectCase("{}");
+		TestParseObjectCase("{}");
 
-		TestObjectCase("{ \"a\" : \"1234\", \"ooo\" : { \"aa\" : 123, \"bbb\" : null, \"ccc\" : {} } }");
+		TestParseObjectCase("{ \"a\" : \"1234\", \"ooo\" : { \"aa\" : 123, \"bbb\" : null, \"ccc\" : {} } }");
 
 		const char *testcase =
 			" { "
@@ -245,7 +258,7 @@ namespace leptjson {
 		}
 	}
 
-	void UnitTest::TestObjectCase(const char * json)
+	void UnitTest::TestParseObjectCase(const char * json)
 	{
 		LeptJsonReader reader;
 		reader.LoadFromString(json);
@@ -257,72 +270,72 @@ namespace leptjson {
 		//std::cout << obj << std::endl;
 	}
 
-	void UnitTest::TestInvalid()
+	void UnitTest::TestParseInvalid()
 	{
 		/************************************************************************/
 		/* 非法字面值                                                            */
 		/************************************************************************/
-		TestInvalidCase("nul");
-		TestInvalidCase("nu");
-		TestInvalidCase("fals");
-		TestInvalidCase("fal se");
-		TestInvalidCase("  trxe ");
-		TestInvalidCase("tru");
-		TestInvalidCase("hello");
-		TestInvalidCase("?");
-		TestInvalidCase("");
+		TestParseInvalidCase("nul");
+		TestParseInvalidCase("nu");
+		TestParseInvalidCase("fals");
+		TestParseInvalidCase("fal se");
+		TestParseInvalidCase("  trxe ");
+		TestParseInvalidCase("tru");
+		TestParseInvalidCase("hello");
+		TestParseInvalidCase("?");
+		TestParseInvalidCase("");
 
 		/************************************************************************/
 		/* 非法数字                                                              */
 		/************************************************************************/
-		TestInvalidCase("0.1 * 20");
-		TestInvalidCase("+1 + -2");
-		TestInvalidCase(".123xx"); /* at least one digit before '.' */
-		TestInvalidCase("1.xx");   /* at least one digit after '.' */
-		TestInvalidCase("inf");
-		TestInvalidCase("1e309");
+		TestParseInvalidCase("0.1 * 20");
+		TestParseInvalidCase("+1 + -2");
+		TestParseInvalidCase(".123xx"); /* at least one digit before '.' */
+		TestParseInvalidCase("1.xx");   /* at least one digit after '.' */
+		TestParseInvalidCase("inf");
+		TestParseInvalidCase("1e309");
 
 		/************************************************************************/
 		/* 非法字符串                                                            */
 		/************************************************************************/
-		TestInvalidCase("\"\\v\"");
-		TestInvalidCase("\"\\'\"");
-		TestInvalidCase("\"\\0\"");
-		TestInvalidCase("\"\\x12\"");
-		TestInvalidCase("\"\x01\"");
-		TestInvalidCase("\"\x1F\"");
+		TestParseInvalidCase("\"\\v\"");
+		TestParseInvalidCase("\"\\'\"");
+		TestParseInvalidCase("\"\\0\"");
+		TestParseInvalidCase("\"\\x12\"");
+		TestParseInvalidCase("\"\x01\"");
+		TestParseInvalidCase("\"\x1F\"");
 
 		/************************************************************************/
 		/* 非法数组                                                              */
 		/************************************************************************/
-		TestInvalidCase("[1");
-		TestInvalidCase("[1}");
-		TestInvalidCase("[1 2");
-		TestInvalidCase("[[]");
-		TestInvalidCase("[1,]");
-		TestInvalidCase("[\"a\", nul]");
-		TestInvalidCase("[\"a\" : nul]");
+		TestParseInvalidCase("[1");
+		TestParseInvalidCase("[1}");
+		TestParseInvalidCase("[1 2");
+		TestParseInvalidCase("[[]");
+		TestParseInvalidCase("[1,]");
+		TestParseInvalidCase("[\"a\", nul]");
+		TestParseInvalidCase("[\"a\" : nul]");
 
 		/************************************************************************/
 		/* 非法对象                                                              */
 		/************************************************************************/
-		TestInvalidCase("{:1,");
-		TestInvalidCase("{1:1,");
-		TestInvalidCase("{true:1,");
-		TestInvalidCase("{false:1,");
-		TestInvalidCase("{null:1,");
-		TestInvalidCase("{[]:1,");
-		TestInvalidCase("{{}:1,");
-		TestInvalidCase("{\"a\":1,");
-		TestInvalidCase("{\"a\"}");
-		TestInvalidCase("{\"a\",\"b\"}");
-		TestInvalidCase("{\"a\":1");
-		TestInvalidCase("{\"a\":1]");
-		TestInvalidCase("{\"a\":1 \"b\"");
-		TestInvalidCase("{\"a\":{}");
+		TestParseInvalidCase("{:1,");
+		TestParseInvalidCase("{1:1,");
+		TestParseInvalidCase("{true:1,");
+		TestParseInvalidCase("{false:1,");
+		TestParseInvalidCase("{null:1,");
+		TestParseInvalidCase("{[]:1,");
+		TestParseInvalidCase("{{}:1,");
+		TestParseInvalidCase("{\"a\":1,");
+		TestParseInvalidCase("{\"a\"}");
+		TestParseInvalidCase("{\"a\",\"b\"}");
+		TestParseInvalidCase("{\"a\":1");
+		TestParseInvalidCase("{\"a\":1]");
+		TestParseInvalidCase("{\"a\":1 \"b\"");
+		TestParseInvalidCase("{\"a\":{}");
 	}
 
-	void UnitTest::TestInvalidCase(const char* json)
+	void UnitTest::TestParseInvalidCase(const char* json)
 	{
 		LeptJsonReader reader;
 		reader.LoadFromString(json);

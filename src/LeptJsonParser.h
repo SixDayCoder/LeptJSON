@@ -15,9 +15,11 @@ namespace leptjson {
 
 	enum class LeptJsonGenRet
 	{
-		LEPT_JSON_Stringify_SUCCESS,
-		LEPT_JSON_Stringify_FAIL
+		LEPT_JSON_GEN_STRINGILFY_SUCCESS,
+		LEPT_JSON_GEN_STRINGILFY_FAIL,
+		LEPT_JSON_GEN_WRITE_TO_FILE_FAIL,
 	};
+
 
 	/************************************************************************/
 	/* ½âÎöÆ÷                                                                */
@@ -96,8 +98,10 @@ namespace leptjson {
 
 	public:
 
-		LeptJsonWriter() { m_isStringifiied = false; m_value = 0;  }
+		LeptJsonWriter() { m_isStringifiied = false;  m_value = 0; }
 		~LeptJsonWriter() {}
+
+		void Push(const LeptJsonValue& val);
 
 		void Push(const String& key, const LeptJsonValue& val);
 

@@ -8,24 +8,19 @@ using namespace leptjson;
 
 int main() 
 {	
-	/************************************************************************/
-	/*parse的单元测试                                                        */
-	/************************************************************************/
-	std::cout << std::endl;
-	UnitTest::Instance().TestParseAll();
-	std::cout << std::endl;
+
+	UnitTest::Instance().TestAll();
 	
-	/************************************************************************/
-	/* 代码                                                                 */
-	/************************************************************************/
-	const char* text = "{\"   title  \":\"windows\", \"empty\":[], \"   arr\":[123,[12, 23, 34],null,[] , {}, \"string\"],\"num  \":1234, \"  liter\":false, \"  obj\":{\"inter\" : 789} }";
 	LeptJsonReader reader;
-	//reader.LoadFromString(text);
 	reader.LoadFromFile("example1.txt");
 	reader.Parse();
+	if (LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS == reader.ParseState()) {
+		LeptJsonValue& value = reader.ParseResult();
+		std::cout << value << std::endl;
+	}
+
 
 	LeptJsonWriter writer;
-
 	if (LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS == reader.ParseState()) {
 		LeptJsonValue& value = reader.ParseResult();
 		if (value.IsHaveKeys()) {
@@ -37,20 +32,12 @@ int main()
 
 			}
 		}
+		else {
+			writer.Push(value);
+		}
 	}
 
 	writer.Write("output.txt");
-
-	//if (LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS == reader.ParseState()) {
-	//	LeptJsonValue& value = reader.ParseResult();
-	//	if (value.IsHaveKeys()) {
-	//		Object& obj = value.GetObject();
-	//		std::cout << obj << std::endl;
-	//	}
-	//	else {
-	//		std::cout << reader.ParseResult() << std::endl;
-	//	}
-	//}
 
 	return 0;
 }

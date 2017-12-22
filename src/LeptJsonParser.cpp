@@ -403,6 +403,20 @@ namespace leptjson {
 	/* Éú³ÉÆ÷                                                                */
 	/************************************************************************/
 
+	void LeptJsonWriter::Push(const LeptJsonValue & val)
+	{
+
+		if (m_value == 0) {
+			m_value = std::make_shared<LeptJsonValue>(val);
+		}
+		else
+		{
+			m_value->Reset();
+			m_value = 0;
+			m_value = std::make_shared<LeptJsonValue>(val);
+		}
+	}
+
 	void LeptJsonWriter::Push(const String & key, const LeptJsonValue & val)
 	{
 		LeptJsonType type = val.GetType();
@@ -462,7 +476,6 @@ namespace leptjson {
 			LeptJsonValuePtr val = LeptJsonValue::CreateLeptJsonValue();
 			val->SetString(src);
 			m_map.insert(std::make_pair(key, val));
-			//insert
 		}
 	}
 

@@ -29,31 +29,46 @@ namespace leptjson {
 		static size_t sTotalTestCount;
 		static size_t sPassTestCount;
 	public:
+
+		void TestAll();
+
+	private:
+		/************************************************************************/
+		/* 解析器单元测试                                                        */
+		/************************************************************************/
 		void TestParseAll();
 		
-		void TestLiteral();
+		void TestParseLiteral();
 
-		void TestLiteralCase(const char* json);
+		void TestParseLiteralCase(const char* json);
 
-		void TestNumber();
+		void TestParseNumber();
 
-		void TestNumberCase(Number expect, const char* json);
+		void TestParseNumberCase(Number expect, const char* json);
 
-		void TestString();
+		void TestParseString();
 
-		void TestStringCase(const String& expect, const char* json);
+		void TestParseStringCase(const String& expect, const char* json);
 
-		void TestArray();
+		void TestParseArray();
 
-		void TestArrayCase(const char* json);
+		void TestParseArrayCase(const char* json);
 
-		void TestObject();
+		void TestParseObject();
 
-		void TestObjectCase(const char* json);
+		void TestParseObjectCase(const char* json);
 
-		void TestInvalid();
+		void TestParseInvalid();
 
-		void TestInvalidCase(const char* json);
+		void TestParseInvalidCase(const char* json);
+
+		void TestGenerateAll();
+
+		/************************************************************************/
+		/* 生成器单元测试                                                        */
+		/************************************************************************/
+
+	private:
 
 		template<typename ElementType>
 		void ExpectEqActual(const ElementType& expect, const ElementType& actual)

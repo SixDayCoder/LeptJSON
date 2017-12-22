@@ -54,7 +54,6 @@ namespace leptjson {
 		SetType(LeptJsonType::LEPT_JSON_OBJECT);
 	}
 
-
 	void LeptJsonValue::Reset()
 	{
 		if (type == LeptJsonType::LEPT_JSON_STRING) {
