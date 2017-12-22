@@ -23,30 +23,29 @@ reader.Parse()；
 
 //例子如下
 LeptJsonReader reader;
-	reader.LoadFromFile("example1.txt");
-	reader.Parse();
-	if (LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS == reader.ParseState()) {
-		LeptJsonValue& value = reader.ParseResult();
-		std::cout << value << std::endl;
-	}
+reader.LoadFromFile("example1.txt");
+reader.Parse();
+if (LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS == reader.ParseState()) {
+	LeptJsonValue& value = reader.ParseResult();
+	std::cout << value << std::endl;
+}
 
 
-	LeptJsonWriter writer;
-	if (LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS == reader.ParseState()) {
-		LeptJsonValue& value = reader.ParseResult();
-		if (value.IsHaveKeys()) {
-			Object& obj = value.GetObject();
-			for (auto it = obj.begin(); it != obj.end(); ++it) {
-				const String& key = it->first;
-				const LeptJsonValue& val = *it->second;
-				writer.Push(key, val);
-
-			}
-		}
-		else {
-			writer.Push(value);
+LeptJsonWriter writer;
+if (LeptJsonParseRet::LEPT_JSON_PARSE_SUCCESS == reader.ParseState()) {
+	LeptJsonValue& value = reader.ParseResult();
+	if (value.IsHaveKeys()) {
+		Object& obj = value.GetObject();
+		for (auto it = obj.begin(); it != obj.end(); ++it) {
+			const String& key = it->first;
+			const LeptJsonValue& val = *it->second;
+			writer.Push(key, val);
 		}
 	}
+	else {
+		writer.Push(value);
+	}
+}
 
-	writer.Write("output.txt");
+writer.Write("output.txt");
 ```
