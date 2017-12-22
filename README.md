@@ -10,7 +10,7 @@
 
 引入LeptJsonParser.h文件夹,如想查看单元测试需引入UnitTest.h.
 
-`
+```c
 //1.声明LeptJsonReader的变量
 LeptJsonReader reader;
 //2.从raw char或者从文件中导入json文本
@@ -49,4 +49,4 @@ LeptJsonReader reader;
 	}
 
 	writer.Write("output.txt");
-`
+```
